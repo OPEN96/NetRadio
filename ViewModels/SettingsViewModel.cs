@@ -15,6 +15,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
         _autoPlayLastStation = settings.AutoPlayLastStation;
         _networkCachingMs = settings.NetworkCachingMs;
         _recordingsFolder = settings.RecordingsFolder;
+        _minimizeToTray = settings.MinimizeToTray;
+        _closeToTray = settings.CloseToTray;
+        _miniPlayerAlwaysOnTop = settings.MiniPlayerAlwaysOnTop;
     }
 
     public IReadOnlyList<string> Themes { get; } = new[] { "跟随系统", "浅色", "深色" };
@@ -23,6 +26,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
     [ObservableProperty] private bool _autoPlayLastStation;
     [ObservableProperty] private int _networkCachingMs = 3000;
     [ObservableProperty] private string _recordingsFolder = string.Empty;
+    [ObservableProperty] private bool _minimizeToTray = true;
+    [ObservableProperty] private bool _closeToTray = true;
+    [ObservableProperty] private bool _miniPlayerAlwaysOnTop = true;
 
     /// <summary>把界面上的选择写回设置对象。</summary>
     public void Apply()
@@ -33,6 +39,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
         _settings.RecordingsFolder = string.IsNullOrWhiteSpace(RecordingsFolder)
             ? AppPaths.DefaultRecordingsDirectory
             : RecordingsFolder.Trim();
+        _settings.MinimizeToTray = MinimizeToTray;
+        _settings.CloseToTray = CloseToTray;
+        _settings.MiniPlayerAlwaysOnTop = MiniPlayerAlwaysOnTop;
     }
 
     public string SelectedThemeKey => Theme switch

@@ -21,6 +21,7 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
     private readonly StationLibrary _library;
     private readonly SettingsService _settingsService;
     private readonly IDialogService _dialogs;
+    private readonly IShellService _shell;
 
     private readonly Dictionary<string, List<RadioStation>> _cache = new(StringComparer.Ordinal);
     private readonly DispatcherTimer _sleepTimer;
@@ -35,18 +36,22 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
         IStationDirectory directory,
         StationLibrary library,
         SettingsService settingsService,
-        IDialogService dialogs)
+        IDialogService dialogs,
+        IShellService shell)
     {
         _player = player;
         _directory = directory;
         _library = library;
         _settingsService = settingsService;
         _dialogs = dialogs;
+        _shell = shell;
 
         _player.StateChanged += OnPlayerStateChanged;
         _player.NowPlayingChanged += OnNowPlayingChanged;
         _player.BufferingChanged += OnBufferingChanged;
         _player.ErrorOccurred += OnPlayerError;
+
+        _shell.MiniPlayerVisibilityChanged += OnMiniPlayerVisibilityChanged;
 
         Volume = settingsService.Current.Volume;
         IsMuted = settingsService.Current.IsMuted;
@@ -106,9 +111,21 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
 
     public bool HasCurrentStation => CurrentStation is not null;
 
+    public bool CanSwitchStation => Stations.Count > 0;
+
     public bool IsPlaying => Status is PlaybackStatus.Playing or PlaybackStatus.Connecting;
 
     public bool CanPause => Status is PlaybackStatus.Playing or PlaybackStatus.Paused or PlaybackStatus.Connecting;
+
+    // ---------------- 托盘 / 小窗口（状态来自设置与外壳服务） ----------------
+
+    public bool MinimizeToTrayEnabled => _settingsService.Current.MinimizeToTray;
+
+    public bool CloseToTrayEnabled => _settingsService.Current.CloseToTray;
+
+    public bool MiniPlayerAlwaysOnTop => _settingsService.Current.MiniPlayerAlwaysOnTop;
+
+    public bool IsMiniPlayerOpen => _shell.IsMiniPlayerOpen;
 
     public string StatusText =>
         Status == PlaybackStatus.Playing && IsRebuffering
@@ -280,6 +297,8 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
         {
             Stations.Add(s);
         }
+
+        OnPropertyChanged(nameof(CanSwitchStation));
     }
 
     [RelayCommand]
@@ -353,6 +372,45 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
         NowPlaying = null;
         foreach (var s in Stations) s.IsPlaying = false;
         OnPropertyChanged(nameof(WindowTitle));
+    }
+
+    /// <summary>播放当前列表中的下一曲（下一家电台）。</summary>
+    [RelayCommand]
+    private void PlayNext() => PlayAdjacent(1);
+
+    /// <summary>播放当前列表中的上一曲（上一家电台）。</summary>
+    [RelayCommand]
+    private void PlayPrevious() => PlayAdjacent(-1);
+
+    private void PlayAdjacent(int delta)
+    {
+        if (Stations.Count == 0)
+        {
+            StatusMessage = "当前列表没有可切换的电台";
+            return;
+        }
+
+        // 当前电台可能是启用时续播的实例，并不在列表中，此时退回选中项或首尾。
+        var index = CurrentStation is null ? -1 : Stations.IndexOf(CurrentStation);
+        if (index < 0 && SelectedStation is not null)
+        {
+            index = Stations.IndexOf(SelectedStation);
+        }
+
+        int target;
+        if (index < 0)
+        {
+            target = delta > 0 ? 0 : Stations.Count - 1;
+        }
+        else
+        {
+            target = (index + delta + Stations.Count) % Stations.Count;
+        }
+
+        var station = Stations[target];
+        Play(station);
+        SelectedStation = station;
+        StatusMessage = delta > 0 ? $"下一曲：{station.Name}" : $"上一曲：{station.Name}";
     }
 
     partial void OnVolumeChanged(int value)
@@ -445,6 +503,12 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
 
         // 主题 / 网络缓冲等立即生效
         AppServices.ApplyTheme?.Invoke(settings.Theme);
+
+        // 托盘 / 小窗口相关开关也可能刚被修改
+        OnPropertyChanged(nameof(MinimizeToTrayEnabled));
+        OnPropertyChanged(nameof(CloseToTrayEnabled));
+        OnPropertyChanged(nameof(MiniPlayerAlwaysOnTop));
+
         StatusMessage = "设置已保存";
     }
 
@@ -457,6 +521,20 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
                 : "uuid:" + station.StationUuid;
         }
     }
+
+    // ---------------- 托盘 / 小窗口 ----------------
+
+    [RelayCommand]
+    private void ToggleMiniPlayer() => _shell.ToggleMiniPlayer();
+
+    [RelayCommand]
+    private void ShowMainWindow() => _shell.ShowMainWindow();
+
+    [RelayCommand]
+    private void HideMainWindow() => _shell.HideMainWindow();
+
+    [RelayCommand]
+    private void ExitApp() => _shell.ExitApp();
 
     // ---------------- 录音 ----------------
 
@@ -600,6 +678,11 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
         Dispatcher.UIThread.Post(() => StatusMessage = message ?? "播放出错");
     }
 
+    private void OnMiniPlayerVisibilityChanged(object? sender, EventArgs e)
+    {
+        Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(IsMiniPlayerOpen)));
+    }
+
     // ---------------- 设置保存去抖 ----------------
 
     private void ScheduleSaveSettings()
@@ -636,6 +719,7 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
         _player.NowPlayingChanged -= OnNowPlayingChanged;
         _player.BufferingChanged -= OnBufferingChanged;
         _player.ErrorOccurred -= OnPlayerError;
+        _shell.MiniPlayerVisibilityChanged -= OnMiniPlayerVisibilityChanged;
 
         _sleepTimer.Stop();
         _loadCts?.Cancel();

@@ -3,8 +3,8 @@
         xmlns:vm="using:NetRadio.ViewModels"
         x:Class="NetRadio.Views.SettingsWindow"
         x:DataType="vm:SettingsViewModel"
-        Width="520" Height="440"
-        MinWidth="480" MinHeight="400"
+        Width="520" Height="600"
+        MinWidth="480" MinHeight="540"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         CanResize="False"
@@ -48,6 +48,23 @@
                            Foreground="{DynamicResource TextPrimaryBrush}" />
                 <TextBox Text="{Binding RecordingsFolder, Mode=TwoWay}" />
             </StackPanel>
+
+            <Border BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="0,1,0,0"
+                    Margin="0,2,0,0" Padding="0,14,0,0">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="托盘与窗口" FontSize="12.5" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <CheckBox Content="最小化主窗口时隐藏到系统托盘"
+                              IsChecked="{Binding MinimizeToTray, Mode=TwoWay}" />
+                    <CheckBox Content="点击关闭按钮时最小化到托盘（不退出程序）"
+                              IsChecked="{Binding CloseToTray, Mode=TwoWay}" />
+                    <CheckBox Content="小窗口播放时始终置顶"
+                              IsChecked="{Binding MiniPlayerAlwaysOnTop, Mode=TwoWay}" />
+                    <TextBlock Text="关闭「关闭到托盘」后，从托盘菜单选择「退出」即可结束程序。"
+                               FontSize="11" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                </StackPanel>
+            </Border>
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"

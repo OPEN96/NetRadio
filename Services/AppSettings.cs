@@ -17,6 +17,15 @@ public sealed partial class AppSettings : ObservableObject
 
     [ObservableProperty] private string _recordingsFolder = AppPaths.DefaultRecordingsDirectory;
 
+    /// <summary>最小化主窗口时隐藏到系统托盘。</summary>
+    [ObservableProperty] private bool _minimizeToTray = true;
+
+    /// <summary>点击关闭按钮时最小化到托盘，而不是退出程序。</summary>
+    [ObservableProperty] private bool _closeToTray = true;
+
+    /// <summary>小窗口播放模式默认置顶。</summary>
+    [ObservableProperty] private bool _miniPlayerAlwaysOnTop = true;
+
     /// <summary>上次播放的电台，用于启动时续播。</summary>
     [ObservableProperty] private RadioStation? _lastStation;
 

@@ -39,19 +39,37 @@ public partial class App : Application
 
         var directory = new RadioBrowserService();
         var dialogs = new DialogService(settingsService);
-        var viewModel = new MainViewModel(player, directory, library, settingsService, dialogs);
+        var shell = new ShellService();
+        var viewModel = new MainViewModel(player, directory, library, settingsService, dialogs, shell);
 
         AppServices.ApplyTheme = ApplyTheme;
         ApplyTheme(settingsService.Current.Theme);
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var window = new MainWindow { DataContext = viewModel };
+            var window = new MainWindow(shell) { DataContext = viewModel };
             window.Opened += OnWindowOpened;
             desktop.MainWindow = window;
 
+            shell.Attach(window);
+            shell.AttachLifetime(desktop);
+
+            // 托盘在部分 Linux 桌面环境（缺少 AppIndicator）可能不可用，失败时降级为普通窗口模式。
+            TrayIconService? tray = null;
+            try
+            {
+                tray = new TrayIconService(viewModel, shell);
+                shell.IsTrayAvailable = tray.IsAvailable;
+            }
+            catch (Exception ex)
+            {
+                shell.IsTrayAvailable = false;
+                viewModel.StatusMessage = $"系统托盘不可用：{ex.Message}";
+            }
+
             desktop.ShutdownRequested += (_, _) =>
             {
+                tray?.Dispose();
                 viewModel.Dispose();
                 directory.Dispose();
             };

@@ -111,6 +111,10 @@
                     <PathIcon Data="{StaticResource IconPlus}" Width="18" Height="18" />
                 </Button>
                 <Button Grid.Column="4" Classes="icon" Margin="4,0"
+                        Command="{Binding ToggleMiniPlayerCommand}" ToolTip.Tip="小窗口播放模式">
+                    <PathIcon Data="{StaticResource IconMiniPlayer}" Width="18" Height="18" />
+                </Button>
+                <Button Grid.Column="5" Classes="icon" Margin="4,0"
                         Command="{Binding OpenSettingsCommand}" ToolTip.Tip="设置">
                     <PathIcon Data="{StaticResource IconSettings}" Width="18" Height="18" />
                 </Button>
@@ -314,10 +318,16 @@
 
                 <!-- 控制按钮 -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center"
-                            VerticalAlignment="Center" Spacing="14">
+                            VerticalAlignment="Center" Spacing="8">
                     <Button Classes="icon" Width="40" Height="40" Padding="0"
                             Command="{Binding StopCommand}" ToolTip.Tip="停止">
                         <PathIcon Data="{StaticResource IconStop}" Width="16" Height="16" />
+                    </Button>
+
+                    <Button Classes="icon" Width="40" Height="40" Padding="0"
+                            Command="{Binding PlayPreviousCommand}" ToolTip.Tip="上一曲"
+                            IsEnabled="{Binding CanSwitchStation}">
+                        <PathIcon Data="{StaticResource IconPrevious}" Width="16" Height="16" />
                     </Button>
 
                     <Button Width="52" Height="52" CornerRadius="26" Padding="0" BorderThickness="0"
@@ -325,6 +335,12 @@
                             Command="{Binding TogglePlayPauseCommand}" ToolTip.Tip="播放 / 暂停">
                         <PathIcon Width="22" Height="22" Foreground="White"
                                   Data="{Binding IsPlaying, Converter={StaticResource PlayPauseIcon}}" />
+                    </Button>
+
+                    <Button Classes="icon" Width="40" Height="40" Padding="0"
+                            Command="{Binding PlayNextCommand}" ToolTip.Tip="下一曲"
+                            IsEnabled="{Binding CanSwitchStation}">
+                        <PathIcon Data="{StaticResource IconNext}" Width="16" Height="16" />
                     </Button>
 
                     <Button Classes="icon" Width="40" Height="40" Padding="0"
