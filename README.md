@@ -38,19 +38,23 @@
 
 ## 下载
 
-从 [Releases](https://github.com/OPEN96/NetRadio/releases/latest) 页面下载对应平台的压缩包，解压后即可运行：
+从 [Releases](https://github.com/OPEN96/NetRadio/releases/latest) 页面下载对应平台的压缩包：
 
 | 平台 | 文件 | 运行方式 |
 | --- | --- | --- |
 | Windows x64 | `NetRadio-win-x64.zip` | 解压后双击 `NetRadio.exe` |
-| Linux x64 | `NetRadio-linux-x64.tar.gz` | 见下方 Linux 说明 |
-| Linux ARM64 | `NetRadio-linux-arm64.tar.gz` | 见下方 Linux 说明（需 .NET 10 ARM64 运行时） |
+| Linux x64 | `NetRadio-linux-x64.tar.gz` | 解压后运行 `./NetRadio` |
+| Linux ARM64 | `NetRadio-linux-arm64.tar.gz` | 同上（需 .NET 10 ARM64 运行时） |
 
 每个制品都附带 `.sha256` 校验文件。
 
+**单文件发布**：程序主体只有一个可执行文件（Windows 为 `NetRadio.exe`，Linux 为 `NetRadio`），
+Avalonia / SkiaSharp / libvlc 等原生依赖已内嵌其中。首次启动时会把内嵌组件解压到系统临时目录缓存
+（`%TEMP%\.net\NetRadio\…` 或 `/tmp/.net/NetRadio/…`），之后启动不再重复解压。
+
 ### Windows
 
-需要 Windows 10 1809 或更高版本（x64）。libvlc 原生库已随包附带，无需额外安装。
+需要 Windows 10 1809 或更高版本（x64）。libvlc 原生库与插件已内嵌在单个 `NetRadio.exe` 内，无需额外安装。
 
 ### Linux
 
@@ -103,6 +107,11 @@ pwsh ./scripts/package.ps1 -Rid win-x64 -Version 1.0.0
 # 打包 Linux 制品 → dist/NetRadio-linux-x64.tar.gz
 ./scripts/package.sh linux-x64 1.0.0
 ```
+
+两个脚本都使用**单文件发布**（`PublishSingleFile`）：Windows 会把 libvlc 原生库与插件一并内嵌进
+`NetRadio.exe`，Linux 则内嵌 SkiaSharp 等原生库，压缩包里只保留可执行文件与文档。
+同一份工程也做了 libvlc 体积优化（按架构只带一份、剔除视频/字幕/投流等无关插件），
+细节见 `NetRadio.csproj` 中的 `NetRadioTrimVlcPlugins` 目标。
 
 打包脚本与 CI 共用同一份逻辑（见 `.github/workflows/build.yml`），本地产物与 GitHub Release 上的完全一致。
 

@@ -18,6 +18,18 @@
 
 - 托盘不可用（如部分缺少 AppIndicator 的 Linux 桌面）时不再隐藏窗口，避免界面无法找回。
 
+### 构建与发布
+
+- 制品改为**单文件发布**：`PublishSingleFile` + `IncludeNativeLibrariesForSelfExtract`，
+  Windows 额外用 `IncludeAllContentForSelfExtract` 把 libvlc 原生库与插件一并内嵌；
+  压缩包内只有一个可执行文件（外加文档），首次启动自动解压到临时目录缓存。
+- libvlc 按平台收敛：只随包附带与目标架构匹配的一份（此前 x64 / x86 / arm64 三份全部复制）。
+- 裁剪与纯音频网络电台无关的 libvlc 插件：视频输出 / 视频滤镜 / 字幕渲染 / 可视化、
+  光存储（CD / 蓝光 / DCP）、SRT / RIST / SFTP / NFS / SMB 等协议、视频编解码器、
+  投屏与音频指纹、推流输出。保留 HTTP(S)/HLS 播放与 sout 录音所需模块。
+- 发布产物不再包含 `.pdb` 调试符号。
+- 体积：Windows x64 制品 175MB → **36MB**（单文件 exe 85MB）。
+
 ## [1.0.0] - 2026-10-27
 
 ### 新增

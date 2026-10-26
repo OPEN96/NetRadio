@@ -36,9 +36,82 @@
   <!--
     Windows 需要随包发布 libvlc 原生库；Linux / macOS 使用系统安装的 libvlc
     （Debian / Ubuntu：sudo apt install vlc libvlc-dev；Fedora：sudo dnf install vlc-devel）
+
+    体积优化：NuGet 包默认会把 x64 / x86 / arm64 三份 libvlc（各约 100MB）全部复制，
+    这里只保留与目标架构匹配的一份，并剔除纯音频网络电台用不到的插件。
   -->
   <ItemGroup Condition="'$(RuntimeIdentifier)' == '' OR $(RuntimeIdentifier.StartsWith('win'))">
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.24" />
   </ItemGroup>
+
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == '' OR $(RuntimeIdentifier.StartsWith('win'))">
+    <VlcWindowsX64Enabled>true</VlcWindowsX64Enabled>
+    <VlcWindowsX86Enabled>false</VlcWindowsX86Enabled>
+    <VlcWindowsArm64Enabled>false</VlcWindowsArm64Enabled>
+  </PropertyGroup>
+
+  <!--
+    裁剪 libvlc 插件（仅影响 Windows 制品打包，不影响 Linux 使用系统 libvlc）：
+    - 视频输出 / 视频格式转换 / 视频滤镜 / 可视化 / 字幕渲染：本应用以 no-video 运行，纯音频
+    - 光存储、数字影院、专业传输协议、文件共享等访问插件：只播放 http(s) / hls 网络流
+    - 视频编解码器（AV1 / H.264 / AV1 编码器 / 硬件加速 / Theora / 图文电视 / 字幕 ASS）
+    保留：access(http/https/file/rtp/udp)、demux、codec(音频)、packetizer、audio_output、
+          audio_filter、stream_out + access_output + mux（录音依赖 sout 转码）
+
+    说明：NuGet 包自带的 VlcWindowsX64ExcludeFiles 只按精确文件名排除（通配符不会展开），
+    因此改为在包的目标收集完 Content 之后，按 Link 路径统一移除。
+  -->
+  <Target Name="NetRadioTrimVlcPlugins"
+          AfterTargets="CollectVlcFilesToCopyWindows"
+          Condition="'$(RuntimeIdentifier)' == '' OR $(RuntimeIdentifier.StartsWith('win'))">
+    <ItemGroup>
+      <!-- 纯视频 / 字幕相关插件目录 -->
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\video_output\'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\video_chroma\'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\video_filter\'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\visualization\'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\text_renderer\'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\spu\'))" />
+
+      <!-- 与 http(s) 网络电台无关的访问协议 -->
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\access\libaccess_srt_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\access\librist_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\access\libdcp_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\access\liblibbluray_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\access\libbluray-j2se-'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\access\libsftp_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\access\libnfs_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\access\libsmb2_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\access\libdsm_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\access\libvnc_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\access\libsatip_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\access\libcdda_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\access\libdtv_plugin.dll'))" />
+
+      <!-- 推流输出：录音只用 std{access=file,mux=raw}，不需要专业流协议与投屏 -->
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\access_output\libaccess_output_srt_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\access_output\libaccess_output_rist_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\stream_out\libstream_out_chromaprint_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\stream_out\libstream_out_chromecast_plugin.dll'))" />
+
+      <!-- 视频编解码 / 硬件加速 / 字幕渲染 -->
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\codec\libdav1d_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\codec\libx264_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\codec\libx26410b_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\codec\libaom_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\codec\libqsv_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\codec\libtheora_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\codec\libschroedinger_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\codec\libzvbi_plugin.dll'))" />
+      <_NetRadioVlcPrune Include="@(Content)" Condition="$([System.String]::Copy('%(Content.Link)').Replace('/','\').Contains('\plugins\codec\liblibass_plugin.dll'))" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="@(_NetRadioVlcPrune)" />
+    </ItemGroup>
+
+    <Message Importance="high"
+             Text="libvlc 插件裁剪：移除 @(_NetRadioVlcPrune->Count()) 个文件" />
+  </Target>
 
 </Project>
