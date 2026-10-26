@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=NetRadio
+GenericName=网络收音机
+Comment=基于 .NET 10 与 Avalonia 12 的跨平台网络收音机
+Exec=NetRadio
+Icon=NetRadio
+Terminal=false
+Categories=Audio;AudioVideo;Network;Player;
+Keywords=radio;stream;internet;fm;网络收音机;
+StartupNotify=true

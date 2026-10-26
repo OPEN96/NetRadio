@@ -1,0 +1,59 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:NetRadio.ViewModels"
+        x:Class="NetRadio.Views.SettingsWindow"
+        x:DataType="vm:SettingsViewModel"
+        Width="520" Height="440"
+        MinWidth="480" MinHeight="400"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        CanResize="False"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Title="设置">
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+
+        <TextBlock Grid.Row="0" Text="设置" FontSize="18" FontWeight="SemiBold"
+                   Foreground="{DynamicResource TextPrimaryBrush}" />
+
+        <StackPanel Grid.Row="1" Spacing="18" Margin="0,18,0,0">
+
+            <StackPanel Spacing="6">
+                <TextBlock Text="外观主题" FontSize="12.5"
+                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                <ComboBox ItemsSource="{Binding Themes}" SelectedItem="{Binding Theme, Mode=TwoWay}"
+                          HorizontalAlignment="Stretch" />
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+                <TextBlock Text="网络缓冲（毫秒）" FontSize="12.5"
+                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                <Grid ColumnDefinitions="*,Auto">
+                    <Slider Grid.Column="0" Minimum="300" Maximum="20000" TickFrequency="100"
+                            Value="{Binding NetworkCachingMs, Mode=TwoWay}" />
+                    <TextBlock Grid.Column="1" Width="60" Margin="12,0,0,0"
+                               VerticalAlignment="Center" FontSize="12"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               Text="{Binding NetworkCachingMs}" />
+                </Grid>
+                <TextBlock Text="网络较差时可调高，减少卡顿；但会增加开始播放的等待时间。"
+                           FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+            </StackPanel>
+
+            <CheckBox Content="启动时自动播放上次收听的电台"
+                      IsChecked="{Binding AutoPlayLastStation, Mode=TwoWay}" />
+
+            <StackPanel Spacing="6">
+                <TextBlock Text="录音保存目录" FontSize="12.5"
+                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                <TextBox Text="{Binding RecordingsFolder, Mode=TwoWay}" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"
+                    Spacing="10" Margin="0,18,0,0">
+            <Button Content="取消" Width="90" Click="OnCancelClick" />
+            <Button Content="保存" Width="90" Classes="accent" Click="OnSaveClick" />
+        </StackPanel>
+    </Grid>
+</Window>

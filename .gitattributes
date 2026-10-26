@@ -1,0 +1,16 @@
+# 统一换行符，避免 Windows 上 checkout 后 shell 脚本变成 CRLF 而无法执行
+* text=auto
+
+*.sh    text eol=lf
+*.cs    text eol=lf
+*.axaml text eol=lf
+*.md    text eol=lf
+*.yml   text eol=lf
+*.json  text eol=lf
+*.svg   text eol=lf
+*.desktop text eol=lf
+
+*.ps1   text eol=crlf
+
+*.ico   binary
+*.png   binary

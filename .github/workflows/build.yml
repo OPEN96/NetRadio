@@ -1,0 +1,111 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            name: Windows x64
+          - os: ubuntu-latest
+            rid: linux-x64
+            name: Linux x64
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 解析版本号
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "VERSION=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_ENV"
+          else
+            # 非 tag 构建（PR / 手动触发）使用 CI 版本号
+            echo "VERSION=0.0.0-ci" >> "$GITHUB_ENV"
+          fi
+
+      - name: 安装 .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: 缓存 NuGet 包
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: 还原
+        run: dotnet restore NetRadio.csproj
+
+      - name: 编译（Release，无警告视为通过）
+        run: dotnet build NetRadio.csproj -c Release --no-restore
+
+      - name: 打包（Windows）
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: pwsh -ExecutionPolicy Bypass -File ./scripts/package.ps1 -Rid ${{ matrix.rid }} -Version $env:VERSION
+
+      - name: 打包（Linux）
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          chmod +x scripts/*.sh
+          ./scripts/package.sh ${{ matrix.rid }} "$VERSION"
+
+      - name: 上传制品
+        uses: actions/upload-artifact@v4
+        with:
+          name: NetRadio-${{ matrix.rid }}
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    name: 发布 GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 收集各平台制品
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: 汇总到单一目录
+        run: |
+          mkdir -p release
+          find dist -type f -exec mv {} release/ \;
+          ls -lh release
+
+      - name: 创建 Release 并附带制品
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "NetRadio $GITHUB_REF_NAME" \
+            --generate-notes \
+            --verify-tag \
+            release/*

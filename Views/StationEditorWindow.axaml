@@ -1,0 +1,79 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:NetRadio.ViewModels"
+        xmlns:conv="using:NetRadio.Converters"
+        x:Class="NetRadio.Views.StationEditorWindow"
+        x:DataType="vm:StationEditorViewModel"
+        Width="520" Height="460"
+        MinWidth="480" MinHeight="420"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        CanResize="False"
+        Background="{DynamicResource AppBackgroundBrush}"
+        Title="{Binding Title}">
+
+    <Window.Resources>
+        <conv:StringNotEmptyConverter x:Key="NotEmpty" />
+    </Window.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+
+        <StackPanel Grid.Row="0" Spacing="2">
+            <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextPrimaryBrush}" />
+            <TextBlock Text="支持 http / https 直播流，以及 .m3u8 播放列表地址"
+                       FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" Margin="0,18,0,0">
+            <StackPanel Spacing="14">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="电台名称 *" FontSize="12.5"
+                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <TextBox Text="{Binding Name, Mode=TwoWay}" PlaceholderText="例如：城市之声" />
+                </StackPanel>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="流媒体地址 *" FontSize="12.5"
+                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <TextBox Text="{Binding Url, Mode=TwoWay}"
+                             PlaceholderText="https://example.com/stream.mp3" />
+                </StackPanel>
+
+                <Grid ColumnDefinitions="*,*">
+                    <StackPanel Grid.Column="0" Spacing="6" Margin="0,0,8,0">
+                        <TextBlock Text="国家 / 地区" FontSize="12.5"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBox Text="{Binding Country, Mode=TwoWay}" PlaceholderText="中国" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="6" Margin="8,0,0,0">
+                        <TextBlock Text="语言" FontSize="12.5"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBox Text="{Binding Language, Mode=TwoWay}" PlaceholderText="chinese" />
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="标签（英文逗号分隔）" FontSize="12.5"
+                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <TextBox Text="{Binding Tags, Mode=TwoWay}" PlaceholderText="music,news" />
+                </StackPanel>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="官网" FontSize="12.5"
+                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <TextBox Text="{Binding Homepage, Mode=TwoWay}" PlaceholderText="https://" />
+                </StackPanel>
+
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="#E4572E" FontSize="12"
+                           IsVisible="{Binding ErrorMessage, Converter={StaticResource NotEmpty}}" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"
+                    Spacing="10" Margin="0,18,0,0">
+            <Button Content="取消" Width="90" Click="OnCancelClick" />
+            <Button Content="保存" Width="90" Classes="accent" Click="OnSaveClick" />
+        </StackPanel>
+    </Grid>
+</Window>

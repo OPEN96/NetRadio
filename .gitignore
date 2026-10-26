@@ -1,0 +1,18 @@
+## 构建产物
+bin/
+obj/
+publish/
+dist/
+*.user
+*.suo
+
+## 编辑器 / IDE
+.vs/
+.idea/
+.vscode/
+
+## 日志
+*.log
+
+## 本地工作区数据（记忆等）
+.workbuddy/

@@ -1,0 +1,56 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="NetRadio.App"
+             xmlns:local="using:NetRadio"
+             RequestedThemeVariant="Default">
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://NetRadio/Assets/Icons.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <ResourceDictionary.ThemeDictionaries>
+                <!-- 浅色 -->
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="AppBackgroundBrush" Color="#F4F6FA" />
+                    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="CardHoverBrush" Color="#EEF2F9" />
+                    <SolidColorBrush x:Key="BorderBrushSoft" Color="#E4E8F0" />
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#1A1D24" />
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#6B7280" />
+                    <SolidColorBrush x:Key="HoverBrush" Color="#1A000000" />
+                    <SolidColorBrush x:Key="PlayerBarBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="HeroBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="HeroAccentBrush" Color="#FDECEA" />
+                    <SolidColorBrush x:Key="OnAirBrush" Color="#E4572E" />
+                </ResourceDictionary>
+
+                <!-- 深色 -->
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="AppBackgroundBrush" Color="#14161C" />
+                    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#1B1E26" />
+                    <SolidColorBrush x:Key="CardBackgroundBrush" Color="#1F232C" />
+                    <SolidColorBrush x:Key="CardHoverBrush" Color="#272C37" />
+                    <SolidColorBrush x:Key="BorderBrushSoft" Color="#2C313C" />
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F2F4F8" />
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#9AA3B2" />
+                    <SolidColorBrush x:Key="HoverBrush" Color="#1AFFFFFF" />
+                    <SolidColorBrush x:Key="PlayerBarBrush" Color="#1B1E26" />
+                    <SolidColorBrush x:Key="HeroBrush" Color="#1F232C" />
+                    <SolidColorBrush x:Key="HeroAccentBrush" Color="#33201C" />
+                    <SolidColorBrush x:Key="OnAirBrush" Color="#FF6A4D" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.DataTemplates>
+        <local:ViewLocator />
+    </Application.DataTemplates>
+
+    <Application.Styles>
+        <FluentTheme />
+    </Application.Styles>
+</Application>
