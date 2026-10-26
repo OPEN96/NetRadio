@@ -30,6 +30,9 @@ jobs:
           - os: ubuntu-latest
             rid: linux-x64
             name: Linux x64
+          - os: ubuntu-latest
+            rid: linux-arm64
+            name: Linux ARM64
 
     steps:
       - name: 检出代码
@@ -58,10 +61,10 @@ jobs:
           restore-keys: ${{ runner.os }}-nuget-
 
       - name: 还原
-        run: dotnet restore NetRadio.csproj
+        run: dotnet restore NetRadio.csproj -r ${{ matrix.rid }}
 
       - name: 编译（Release，无警告视为通过）
-        run: dotnet build NetRadio.csproj -c Release --no-restore
+        run: dotnet build NetRadio.csproj -c Release -r ${{ matrix.rid }} --no-restore
 
       - name: 打包（Windows）
         if: runner.os == 'Windows'

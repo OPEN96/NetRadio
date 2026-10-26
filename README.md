@@ -32,6 +32,7 @@
 | --- | --- | --- |
 | Windows x64 | `NetRadio-win-x64.zip` | 解压后双击 `NetRadio.exe` |
 | Linux x64 | `NetRadio-linux-x64.tar.gz` | 见下方 Linux 说明 |
+| Linux ARM64 | `NetRadio-linux-arm64.tar.gz` | 见下方 Linux 说明（需 .NET 10 ARM64 运行时） |
 
 每个制品都附带 `.sha256` 校验文件。
 
@@ -41,17 +42,16 @@
 
 ### Linux
 
-Linux 上使用**系统安装的 libvlc**，首次运行前需要装依赖：
+Linux 构建为**框架依赖型**，运行前需先安装 **.NET 10 运行时**（x64 装 x64 运行时，ARM64 装 arm64 运行时），并安装**系统 libvlc**：
 
 ```bash
-# Debian / Ubuntu
-sudo apt install vlc libvlc-dev libx11-6 libice6 libsm6 libfontconfig1 libcairo2 libgtk-3-0
+# .NET 10 运行时（以 x64 为例，ARM64 请选择对应架构包）
+# 详见 https://dotnet.microsoft.com/download/dotnet/10.0
 
-# Fedora / RHEL
-sudo dnf install vlc vlc-devel libX11 libICE libSM fontconfig cairo gtk3
-
-# Arch
-sudo pacman -S vlc libx11 libice libsm fontconfig cairo gtk3
+# libvlc 依赖
+sudo apt install vlc libvlc-dev   # Debian / Ubuntu
+# sudo dnf install vlc vlc-devel   # Fedora / RHEL
+# sudo pacman -S vlc               # Arch
 ```
 
 也可以直接用仓库里的脚本自动识别发行版：
@@ -60,7 +60,7 @@ sudo pacman -S vlc libx11 libice libsm fontconfig cairo gtk3
 chmod +x scripts/install-linux-deps.sh && ./scripts/install-linux-deps.sh
 ```
 
-然后运行：
+然后运行（将 `linux-x64` 换成对应架构，如 `linux-arm64`）：
 
 ```bash
 tar -xzf NetRadio-linux-x64.tar.gz
