@@ -41,13 +41,16 @@
 
 从 [Releases](https://github.com/OPEN96/NetRadio/releases/latest) 页面下载对应平台的压缩包：
 
+文件名格式为 `NetRadio-<版本>-<架构>.zip` / `.tar.gz`，版本号取自 tag（如 `v1.2.0` → `NetRadio-1.2.0-…`）：
+
 | 平台 | 文件 | 运行方式 |
 | --- | --- | --- |
-| Windows x64 | `NetRadio-win-x64.zip` | 解压后双击 `NetRadio.exe` |
-| Linux x64 | `NetRadio-linux-x64.tar.gz` | 解压后运行 `./NetRadio` |
-| Linux ARM64 | `NetRadio-linux-arm64.tar.gz` | 同上（需 .NET 10 ARM64 运行时） |
+| Windows x64 | `NetRadio-<版本>-win-x64.zip` | 解压后双击 `NetRadio.exe` |
+| Linux x64 | `NetRadio-<版本>-linux-x64.tar.gz` | 解压后运行 `./NetRadio` |
+| Linux ARM64 | `NetRadio-<版本>-linux-arm64.tar.gz` | 同上（需 .NET 10 ARM64 运行时） |
 
-每个制品都附带 `.sha256` 校验文件。
+每个制品都附带同名的 `.sha256` 校验文件，例如
+`sha256sum -c NetRadio-1.2.0-linux-x64.sha256`。
 
 **单文件发布**：程序主体只有一个可执行文件（Windows 为 `NetRadio.exe`，Linux 为 `NetRadio`），
 Avalonia / SkiaSharp / libvlc 等原生依赖已内嵌其中。首次启动时会把内嵌组件解压到系统临时目录缓存
@@ -80,8 +83,8 @@ chmod +x scripts/install-linux-deps.sh && ./scripts/install-linux-deps.sh
 然后运行（将 `linux-x64` 换成对应架构，如 `linux-arm64`）：
 
 ```bash
-tar -xzf NetRadio-linux-x64.tar.gz
-cd NetRadio-linux-x64
+# 压缩包内即为程序本体，直接解压到当前目录（用 -C 指定目录时需先创建）
+tar -xzf NetRadio-1.2.0-linux-x64.tar.gz
 chmod +x NetRadio
 ./NetRadio
 ```
@@ -102,11 +105,14 @@ sudo install -m 644 NetRadio.desktop /usr/share/applications/NetRadio.desktop
 # 运行（Debug）
 dotnet run --project NetRadio.csproj
 
-# 打包 Windows 制品 → dist/NetRadio-win-x64.zip
-pwsh ./scripts/package.ps1 -Rid win-x64 -Version 1.0.0
+# 打包 Windows 制品 → dist/NetRadio-1.2.0-win-x64.zip
+pwsh ./scripts/package.ps1 -Rid win-x64 -Version 1.2.0
 
-# 打包 Linux 制品 → dist/NetRadio-linux-x64.tar.gz
-./scripts/package.sh linux-x64 1.0.0
+# 打包 Linux 制品 → dist/NetRadio-1.2.0-linux-x64.tar.gz
+./scripts/package.sh linux-x64 1.2.0
+
+# 省略版本号时自动读取 NetRadio.csproj 的 <Version>
+./scripts/package.sh linux-arm64
 ```
 
 两个脚本都使用**单文件发布**（`PublishSingleFile`）：Windows 会把 libvlc 原生库与插件一并内嵌进
@@ -176,8 +182,8 @@ NetRadio/
    ```
 
 4. CI 会在 `windows-latest` 与 `ubuntu-latest` 上分别构建，
-   然后把 `NetRadio-win-x64.zip`、`NetRadio-linux-x64.tar.gz` 及校验和
-   自动附加到新建的 GitHub Release 上。
+   然后把 `NetRadio-<版本>-win-x64.zip`、`NetRadio-<版本>-linux-x64.tar.gz`、
+   `NetRadio-<版本>-linux-arm64.tar.gz` 及各自的 `.sha256` 自动附加到新建的 GitHub Release 上。
 
 推送到 `main` 或提交 PR 时只做构建验证，不会创建 Release。也可以在 Actions 页面手动触发。
 

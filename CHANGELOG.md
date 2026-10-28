@@ -38,6 +38,8 @@
   光存储（CD / 蓝光 / DCP）、SRT / RIST / SFTP / NFS / SMB 等协议、视频编解码器、
   投屏与音频指纹、推流输出。保留 HTTP(S)/HLS 播放与 sout 录音所需模块。
 - 发布产物不再包含 `.pdb` 调试符号。
+- 制品文件名带上版本号：`NetRadio-<版本>-<架构>.zip` / `.tar.gz`（如 `NetRadio-1.2.0-linux-x64.tar.gz`），
+  校验文件同名；打包脚本省略版本参数时自动读取 `NetRadio.csproj` 的 `<Version>`。
 - 体积：Windows x64 制品 175MB → **36MB**（单文件 exe 85MB）。
 
 ## [1.0.0] - 2026-10-27

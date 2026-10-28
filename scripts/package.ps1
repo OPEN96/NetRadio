@@ -1,11 +1,14 @@
 ﻿# 打包发布制品（Windows 宿主）
 #
 # 用法:
-#   .\scripts\package.ps1 [-Rid win-x64] [-Version 1.0.0]
+#   .\scripts\package.ps1 [-Rid win-x64] [-Version 1.2.0]
 #
-# 产物:
-#   dist\NetRadio-<rid>.zip
-#   dist\NetRadio-<rid>.sha256
+# 版本号：优先取 -Version，其次取环境变量 VERSION，最后回退到
+#         NetRadio.csproj 里的 <Version>（读不到则用 0.0.0）。
+#
+# 产物（文件名带版本号）:
+#   dist\NetRadio-<version>-<rid>.zip
+#   dist\NetRadio-<version>-<rid>.sha256
 #
 # 发布形态：单文件（PublishSingleFile）。Windows 下 libvlc 原生库与插件
 # 通过 IncludeAllContentForSelfExtract 一并内嵌，首次启动会解压到临时目录缓存。
@@ -23,12 +26,24 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
+# ---- 版本号：参数 > 环境变量 VERSION > csproj <Version> > 0.0.0 ----
+if (-not $Version) { $Version = $env:VERSION }
+if (-not $Version) {
+    $csproj = Join-Path $root "NetRadio.csproj"
+    if (Test-Path $csproj) {
+        $m = [regex]::Match((Get-Content $csproj -Raw), '<Version>\s*([^<]+?)\s*</Version>')
+        if ($m.Success) { $Version = $m.Groups[1].Value }
+    }
+}
+if (-not $Version) { $Version = "0.0.0" }
+$Version = $Version.Trim().TrimStart('v', 'V')
+
 $raw  = Join-Path $root "publish/$Rid/raw"   # dotnet publish 原始输出
 $out  = Join-Path $root "publish/$Rid/app"   # 最终入包目录：只放单文件 exe + 文档
 $dist = Join-Path $root "dist"
 New-Item -ItemType Directory -Path $dist -Force | Out-Null
 
-Write-Host "==> 发布 $Rid（配置 $Config，版本 $(if ($Version) { $Version } else { '默认' })，单文件）" -ForegroundColor Cyan
+Write-Host "==> 发布 $Rid（配置 $Config，版本 $Version，单文件）" -ForegroundColor Cyan
 
 if (Test-Path (Join-Path $root "publish/$Rid")) { Remove-Item -Recurse -Force (Join-Path $root "publish/$Rid") }
 New-Item -ItemType Directory -Path $out -Force | Out-Null
@@ -39,10 +54,10 @@ $publishArgs = @(
     "-p:PublishSingleFile=true",
     "-p:IncludeNativeLibrariesForSelfExtract=true",
     "-p:IncludeAllContentForSelfExtract=true",
+    "-p:Version=$Version",
     "-p:DebugType=none",
     "-p:DebugSymbols=false"
 )
-if ($Version) { $publishArgs += "-p:Version=$Version" }
 
 & dotnet @publishArgs
 if ($LASTEXITCODE -ne 0) { throw "dotnet publish 失败，退出码 $LASTEXITCODE" }
@@ -57,7 +72,7 @@ foreach ($f in @("README.md", "LICENSE", "CHANGELOG.md")) {
     if (Test-Path $f) { Copy-Item $f $out -Force }
 }
 
-$name = "NetRadio-$Rid"
+$name = "NetRadio-$Version-$Rid"
 $zip  = Join-Path $dist "$name.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }
 
