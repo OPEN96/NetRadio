@@ -13,6 +13,12 @@
   与主界面共享同一播放状态，可从顶部栏按钮或托盘菜单随时切换。
 - **上一曲 / 下一曲**：在当前电台列表中循环切换，主界面播放条、小窗口与托盘菜单均可使用。
 - 设置项新增「最小化主窗口时隐藏到系统托盘」「点击关闭按钮时最小化到托盘」「小窗口播放时始终置顶」。
+- **Android 版**：新增独立的 Android 工程（`net10.0-android`，最低 API 26），与桌面版共享
+  `Models` / `ViewModels` / `Services` / 主题资源，播放后端换成系统 `MediaPlayer`：
+  - 手机布局：品牌头部、搜索、分类胶囊、电台列表（台标 / 副标题 / 正在播放 / 收藏）、底部播放条；
+  - 后台播放：前台服务 + `MediaSession` + 通知栏媒体样式，支持锁屏与耳机线控；
+  - 播放列表解析：`.pls` / `.m3u` 自动解析为直链；ICY 元数据单独抓取，实时显示当前曲目；
+  - 适配 Android 15+ 强制沉浸式：按系统安全区为状态栏 / 导航栏动态留边距。
 
 ### 修复
 
@@ -43,6 +49,12 @@
 - CI 增加独立的 `version` 任务统一解析版本号并输出给各构建任务，Actions 构建制品名同样为
   `NetRadio-<版本>-<架构>`；非 tag 构建（main / PR / 手动触发）版本号取 `0.0.0-ci`。
 - 体积：Windows x64 制品 175MB → **36MB**（单文件 exe 85MB）。
+- 新增 `scripts/package-android.sh` / `package-android.ps1`：默认产出通用 APK
+  `dist/NetRadio-<版本>-android.apk`（arm64-v8a + armeabi-v7a）及 `.sha256`，
+  `-Abi` 可只打单一架构；未配置密钥库时用调试密钥签名，支持 `ANDROID_KEYSTORE_PATH` 等环境变量改用自有密钥。
+- CI 新增独立 `android` 任务（`dotnet workload install android` + JDK 21 + Android SDK platform 36），
+  制品名 `NetRadio-<版本>-android`，tag 构建时与桌面制品一起附加到 Release。
+- 主题变量抽到 `Assets/Theme.axaml`，桌面端与 Android 共用同一份浅色 / 深色令牌。
 
 ## [1.0.0] - 2026-10-27
 

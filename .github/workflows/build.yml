@@ -99,9 +99,67 @@ jobs:
           path: dist/*
           if-no-files-found: error
 
+  # Android 独立 job：需要 Android 工作负载 + SDK，构建耗时与桌面三平台分开跑
+  android:
+    name: Android APK
+    needs: version
+    runs-on: ubuntu-latest
+
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: 安装 JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: 缓存 NuGet 包
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-android-nuget-${{ hashFiles('Android/**/*.csproj', 'NetRadio.csproj') }}
+          restore-keys: ${{ runner.os }}-android-nuget-
+
+      - name: 安装 Android 工作负载
+        run: dotnet workload install android
+
+      - name: 准备 Android SDK 组件
+        run: |
+          SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          echo "Android SDK: $SDK"
+          SDKMANAGER="$SDK/cmdline-tools/latest/bin/sdkmanager"
+          if [ -x "$SDKMANAGER" ]; then
+            yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
+            "$SDKMANAGER" "platform-tools" "platforms;android-36" "build-tools;36.0.0" || true
+          fi
+
+      - name: 打包 APK
+        shell: bash
+        run: |
+          chmod +x scripts/*.sh
+          ./scripts/package-android.sh "$VERSION"
+
+      - name: 上传制品
+        uses: actions/upload-artifact@v4
+        with:
+          # 制品名同样带版本号：NetRadio-<版本>-android
+          name: NetRadio-${{ env.VERSION }}-android
+          path: dist/*
+          if-no-files-found: error
+
   release:
     name: 发布 GitHub Release
-    needs: [ version, build ]
+    needs: [ version, build, android ]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
 

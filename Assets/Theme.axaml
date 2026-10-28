@@ -1,0 +1,174 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- 桌面端与 Android 端共用的设计令牌（颜色 / 画刷 / 渐变） -->
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://NetRadio/Assets/Icons.axaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+<ResourceDictionary.ThemeDictionaries>
+                <!-- ==================== 浅色 ==================== -->
+                <ResourceDictionary x:Key="Light">
+                    <!-- 品牌强调色：覆盖 Fluent 默认蓝，让滑块、焦点框、选中态统一为珊瑚橙 -->
+                    <Color x:Key="SystemAccentColor">#F2552E</Color>
+                    <Color x:Key="SystemAccentColorLight1">#FF7048</Color>
+                    <Color x:Key="SystemAccentColorLight2">#FF8F6E</Color>
+                    <Color x:Key="SystemAccentColorLight3">#FFB39A</Color>
+                    <Color x:Key="SystemAccentColorDark1">#D8411F</Color>
+                    <Color x:Key="SystemAccentColorDark2">#B93317</Color>
+                    <Color x:Key="SystemAccentColorDark3">#992810</Color>
+
+                    <SolidColorBrush x:Key="AccentBrush" Color="#F2552E" />
+                    <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="#F2552E" />
+                    <SolidColorBrush x:Key="SystemControlBackgroundAccentBrush" Color="#F2552E" />
+                    <SolidColorBrush x:Key="SystemControlForegroundAccentBrush" Color="#F2552E" />
+                    <SolidColorBrush x:Key="OnAirBrush" Color="#F2552E" />
+
+                    <!-- 表面 -->
+                    <LinearGradientBrush x:Key="AppBackgroundBrush" StartPoint="0%,0%" EndPoint="0%,100%">
+                        <GradientStop Color="#F8F9FC" Offset="0" />
+                        <GradientStop Color="#EFF2F8" Offset="1" />
+                    </LinearGradientBrush>
+                    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="PlayerBarBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="CardHoverBrush" Color="#FFF8F5" />
+                    <SolidColorBrush x:Key="SubtleSurfaceBrush" Color="#F5F7FB" />
+
+                    <!-- 边框 -->
+                    <SolidColorBrush x:Key="BorderBrushSoft" Color="#E7EAF1" />
+                    <SolidColorBrush x:Key="BorderBrushStrong" Color="#D6DBE6" />
+
+                    <!-- 文本 -->
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#15181F" />
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#667085" />
+                    <SolidColorBrush x:Key="TextTertiaryBrush" Color="#98A1B0" />
+
+                    <!-- 交互 -->
+                    <SolidColorBrush x:Key="HoverBrush" Color="#14000000" />
+                    <SolidColorBrush x:Key="PressedBrush" Color="#1F000000" />
+                    <SolidColorBrush x:Key="SelectionBrush" Color="#FFEFE8" />
+                    <SolidColorBrush x:Key="SelectionBorderBrush" Color="#FFD3C4" />
+
+                    <!-- 正在播放卡片 -->
+                    <LinearGradientBrush x:Key="HeroBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+                        <GradientStop Color="#FFF7F1" Offset="0" />
+                        <GradientStop Color="#FFEDE6" Offset="0.55" />
+                        <GradientStop Color="#FFE6EC" Offset="1" />
+                    </LinearGradientBrush>
+                    <SolidColorBrush x:Key="HeroBorderBrush" Color="#FFDCCE" />
+                    <SolidColorBrush x:Key="HeroAccentBrush" Color="#FDECEA" />
+
+                    <!-- 强调渐变（播放键 / 品牌标） -->
+                    <LinearGradientBrush x:Key="AccentGradientBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+                        <GradientStop Color="#FF7A45" Offset="0" />
+                        <GradientStop Color="#F0466E" Offset="1" />
+                    </LinearGradientBrush>
+                    <SolidColorBrush x:Key="AccentSoftBrush" Color="#FFF0EA" />
+
+                    <!-- 标签 -->
+                    <SolidColorBrush x:Key="ChipBrush" Color="#F2F4F9" />
+                    <SolidColorBrush x:Key="ChipTextBrush" Color="#5D6779" />
+
+                    <!-- 滑块（覆盖 Fluent 默认蓝） -->
+                    <SolidColorBrush x:Key="SliderTrackFill" Color="#E7EAF1" />
+                    <SolidColorBrush x:Key="SliderTrackFillPointerOver" Color="#DDE2EC" />
+                    <SolidColorBrush x:Key="SliderTrackFillPressed" Color="#D2D8E4" />
+                    <SolidColorBrush x:Key="SliderTrackValueFill" Color="#F2552E" />
+                    <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#FF7048" />
+                    <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#D8411F" />
+                    <SolidColorBrush x:Key="SliderThumbBackground" Color="#F2552E" />
+                    <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="#FF7048" />
+                    <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="#D8411F" />
+
+                    <!-- 复选框 -->
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="#F2552E" />
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="#FF7048" />
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPressed" Color="#D8411F" />
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeChecked" Color="#F2552E" />
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeCheckedPointerOver" Color="#FF7048" />
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeCheckedPressed" Color="#D8411F" />
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUnchecked" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeUnchecked" Color="#D6DBE6" />
+                    <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="#FFFFFF" />
+                </ResourceDictionary>
+
+                <!-- ==================== 深色 ==================== -->
+                <ResourceDictionary x:Key="Dark">
+                    <Color x:Key="SystemAccentColor">#FF6A45</Color>
+                    <Color x:Key="SystemAccentColorLight1">#FF8664</Color>
+                    <Color x:Key="SystemAccentColorLight2">#FFA184</Color>
+                    <Color x:Key="SystemAccentColorLight3">#FFBCA6</Color>
+                    <Color x:Key="SystemAccentColorDark1">#E0532F</Color>
+                    <Color x:Key="SystemAccentColorDark2">#BE4224</Color>
+                    <Color x:Key="SystemAccentColorDark3">#9C341B</Color>
+
+                    <SolidColorBrush x:Key="AccentBrush" Color="#FF6A45" />
+                    <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="#FF6A45" />
+                    <SolidColorBrush x:Key="SystemControlBackgroundAccentBrush" Color="#FF6A45" />
+                    <SolidColorBrush x:Key="SystemControlForegroundAccentBrush" Color="#FF6A45" />
+                    <SolidColorBrush x:Key="OnAirBrush" Color="#FF7A58" />
+
+                    <LinearGradientBrush x:Key="AppBackgroundBrush" StartPoint="0%,0%" EndPoint="0%,100%">
+                        <GradientStop Color="#12141A" Offset="0" />
+                        <GradientStop Color="#0C0E13" Offset="1" />
+                    </LinearGradientBrush>
+                    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#171A21" />
+                    <SolidColorBrush x:Key="PlayerBarBrush" Color="#15181E" />
+                    <SolidColorBrush x:Key="CardBackgroundBrush" Color="#1B1F27" />
+                    <SolidColorBrush x:Key="CardHoverBrush" Color="#232833" />
+                    <SolidColorBrush x:Key="SubtleSurfaceBrush" Color="#1F242D" />
+
+                    <SolidColorBrush x:Key="BorderBrushSoft" Color="#262B36" />
+                    <SolidColorBrush x:Key="BorderBrushStrong" Color="#343B49" />
+
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F2F4F8" />
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#9BA4B4" />
+                    <SolidColorBrush x:Key="TextTertiaryBrush" Color="#727C8D" />
+
+                    <SolidColorBrush x:Key="HoverBrush" Color="#18FFFFFF" />
+                    <SolidColorBrush x:Key="PressedBrush" Color="#26FFFFFF" />
+                    <SolidColorBrush x:Key="SelectionBrush" Color="#33211C" />
+                    <SolidColorBrush x:Key="SelectionBorderBrush" Color="#6B3B2B" />
+
+                    <LinearGradientBrush x:Key="HeroBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+                        <GradientStop Color="#2A1E1C" Offset="0" />
+                        <GradientStop Color="#251B23" Offset="0.55" />
+                        <GradientStop Color="#1E1A26" Offset="1" />
+                    </LinearGradientBrush>
+                    <SolidColorBrush x:Key="HeroBorderBrush" Color="#3B2B27" />
+                    <SolidColorBrush x:Key="HeroAccentBrush" Color="#3A241E" />
+
+                    <LinearGradientBrush x:Key="AccentGradientBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+                        <GradientStop Color="#FF8557" Offset="0" />
+                        <GradientStop Color="#E24A6E" Offset="1" />
+                    </LinearGradientBrush>
+                    <SolidColorBrush x:Key="AccentSoftBrush" Color="#33211C" />
+
+                    <SolidColorBrush x:Key="ChipBrush" Color="#242A35" />
+                    <SolidColorBrush x:Key="ChipTextBrush" Color="#A9B2C1" />
+
+                    <!-- 滑块（覆盖 Fluent 默认蓝） -->
+                    <SolidColorBrush x:Key="SliderTrackFill" Color="#2C3340" />
+                    <SolidColorBrush x:Key="SliderTrackFillPointerOver" Color="#39414F" />
+                    <SolidColorBrush x:Key="SliderTrackFillPressed" Color="#444D5D" />
+                    <SolidColorBrush x:Key="SliderTrackValueFill" Color="#FF6A45" />
+                    <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#FF8664" />
+                    <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#E0532F" />
+                    <SolidColorBrush x:Key="SliderThumbBackground" Color="#FF6A45" />
+                    <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="#FF8664" />
+                    <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="#E0532F" />
+
+                    <!-- 复选框 -->
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="#FF6A45" />
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="#FF8664" />
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPressed" Color="#E0532F" />
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeChecked" Color="#FF6A45" />
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeCheckedPointerOver" Color="#FF8664" />
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeCheckedPressed" Color="#E0532F" />
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUnchecked" Color="#1B1F27" />
+                    <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeUnchecked" Color="#3A4150" />
+                    <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="#FFFFFF" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

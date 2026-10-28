@@ -1,10 +1,10 @@
 # NetRadio 网络收音机
 
-一款基于 **.NET 10** 与 **Avalonia 12** 的跨平台网络收音机，支持 **Windows** 与 **Linux**（桌面端 X11 / Wayland）。
+一款基于 **.NET 10** 与 **Avalonia 12** 的跨平台网络收音机，支持 **Windows**、**Linux**（桌面端 X11 / Wayland）与 **Android**。
 
 [![Build & Release](https://github.com/OPEN96/NetRadio/actions/workflows/build.yml/badge.svg)](https://github.com/OPEN96/NetRadio/actions/workflows/build.yml)
 [![Release](https://img.shields.io/github/v/release/OPEN96/NetRadio?label=release)](https://github.com/OPEN96/NetRadio/releases/latest)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-blue)](https://github.com/OPEN96/NetRadio/releases/latest)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20Android-blue)](https://github.com/OPEN96/NetRadio/releases/latest)
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -26,6 +26,7 @@
 | 主题 | 跟随系统 / 浅色 / 深色 |
 | 断网可用 | 在线目录不可用时自动回退到内置稳定电台 |
 | 断点续听 | 记住上一次收听的电台与音量，启动自动续播（可关闭） |
+| Android 版 | 与桌面版共享视图模型与业务代码，手机端提供分类胶囊、搜索、电台列表与底部播放条；通知栏媒体控制、耳机线控与后台播放 |
 
 ### 系统托盘与小窗口
 
@@ -48,6 +49,7 @@
 | Windows x64 | `NetRadio-<版本>-win-x64.zip` | 解压后双击 `NetRadio.exe` |
 | Linux x64 | `NetRadio-<版本>-linux-x64.tar.gz` | 解压后运行 `./NetRadio` |
 | Linux ARM64 | `NetRadio-<版本>-linux-arm64.tar.gz` | 同上（需 .NET 10 ARM64 运行时） |
+| Android | `NetRadio-<版本>-android.apk` | 传到手机安装（需 Android 8.0 及以上） |
 
 每个制品都附带同名的 `.sha256` 校验文件，例如
 `sha256sum -c NetRadio-1.2.0-linux-x64.sha256`。
@@ -97,6 +99,20 @@ sudo install -m 644 NetRadio.svg /usr/share/pixmaps/NetRadio.svg
 sudo install -m 644 NetRadio.desktop /usr/share/applications/NetRadio.desktop
 ```
 
+### Android
+
+`NetRadio-<版本>-android.apk` 是通用安装包（arm64-v8a + armeabi-v7a），适用于 Android 8.0（API 26）及以上：
+
+```bash
+# 传到手机后直接点开安装；首次安装需允许「安装未知来源应用」
+adb install -r NetRadio-1.2.0-android.apk
+```
+
+- **通知栏控制**：允许通知权限后，通知栏与锁屏会出现播放 / 暂停 / 上一曲 / 下一曲控制（Android 13+ 首次启动会申请通知权限）。
+- **后台播放**：切到后台或锁屏后通过前台服务继续播放，通知栏常驻媒体控制。
+- **签名说明**：Release 里的 APK 使用 .NET Android 的调试密钥签名，可直接安装测试；若要上架应用商店，
+  请用自有密钥重新签名（见下方「从源码构建 → Android」）。
+
 ## 从源码构建
 
 需要 [.NET 10 SDK](https://dotnet.microsoft.com/download)。
@@ -113,6 +129,43 @@ pwsh ./scripts/package.ps1 -Rid win-x64 -Version 1.2.0
 
 # 省略版本号时自动读取 NetRadio.csproj 的 <Version>
 ./scripts/package.sh linux-arm64
+
+# 打包 Android 通用 APK（arm64 + arm32）→ dist/NetRadio-1.2.0-android.apk
+pwsh ./scripts/package-android.ps1 -Version 1.2.0   # Windows 宿主
+./scripts/package-android.sh 1.2.0                  # Linux / macOS 宿主
+
+# 只要 64 位 ARM 包（体积更小）
+pwsh ./scripts/package-android.ps1 -Abi android-arm64
+```
+
+### Android 工程
+
+Android 版是一个独立工程 `Android/NetRadio.Android.csproj`（`net10.0-android`，最低 API 26）：
+
+- **复用桌面端代码**：通过 `<Compile Include="..\ViewModels\**\*.cs" />` 等链接项引入 `Models` / `Converters` /
+  `ViewModels` / `Services`，不复制文件，业务逻辑与桌面版完全一致。工程 `AssemblyName` 与桌面端同为 `NetRadio`，
+  因此 `avares://NetRadio/Assets/*.axaml` 这类资源 URI 两边通用，主题与图标只维护一份。
+- **播放后端**：`Android/Playback/AndroidRadioPlayer.cs` 用 `Android.Media.MediaPlayer` 实现 `IRadioPlayer`，
+  另含 `.pls` / `.m3u` 播放列表解析（`StreamUrlResolver`）与 ICY 曲目抓取（`IcyMetadataReader`）。
+- **后台播放**：`RadioPlaybackService` 前台服务 + `MediaSession` + 通知栏媒体样式，耳机线控与锁屏控制均走这里。
+- **界面**：`Android/Views/MobileMainView.axaml` 是手机布局（分类胶囊 + 电台列表 + 底部播放条），
+  并按系统安全区动态加内边距（Android 15+ 强制沉浸式）。
+
+前置依赖：
+
+```bash
+dotnet workload install android     # Android 工作负载
+# 另需 Android SDK（platform 36、build-tools 36.0.0、platform-tools）与 JDK 21
+```
+
+使用自有密钥签名（不设置时用调试密钥）：
+
+```bash
+export ANDROID_KEYSTORE_PATH=/path/to/release.keystore
+export ANDROID_KEYSTORE_PASSWORD=******
+export ANDROID_KEY_ALIAS=netradio
+export ANDROID_KEY_PASSWORD=******
+./scripts/package-android.sh 1.2.0
 ```
 
 两个脚本都使用**单文件发布**（`PublishSingleFile`）：Windows 会把 libvlc 原生库与插件一并内嵌进
@@ -128,6 +181,7 @@ pwsh ./scripts/package.ps1 -Rid win-x64 -Version 1.2.0
 - **Avalonia UI 12.1** + Fluent 主题 + 编译型绑定
 - **CommunityToolkit.Mvvm 8.4**（`ObservableProperty` / `RelayCommand` 源生成器）
 - **LibVLCSharp 3.10** + libvlc 原生解码（Windows 随包发布，Linux 使用系统 libvlc）
+- **Android**：`Android.Media.MediaPlayer` + `MediaSession` + 前台服务（通知栏 / 锁屏 / 耳机线控）
 - **System.Text.Json** 本地持久化
 
 ## 目录结构
@@ -137,6 +191,7 @@ NetRadio/
 ├── App.axaml / App.axaml.cs       应用入口、主题与依赖装配
 ├── Program.cs
 ├── Assets/Icons.axaml             全量 SVG 图标（无第三方图标依赖）
+├── Assets/Theme.axaml             浅色 / 深色主题令牌（桌面与 Android 共用）
 ├── Models/                        RadioStation / PlaybackStatus / CategoryItem
 ├── Services/
 │   ├── VlcRadioPlayer.cs          libvlc 播放后端（ICY 元数据、录制）
@@ -150,6 +205,13 @@ NetRadio/
 ├── ViewModels/                    MainViewModel / StationEditor / Settings
 ├── Views/                         MainWindow / StationEditorWindow / SettingsWindow
 ├── Converters/                    头像、图标等 XAML 转换器
+├── Android/                       Android 工程（链接复用上层 Models/ViewModels/Services）
+│   ├── NetRadio.Android.csproj    net10.0-android
+│   ├── App.axaml(.cs)             移动端应用入口与依赖装配
+│   ├── MainActivity.cs            Avalonia 宿主 Activity
+│   ├── Playback/                  MediaPlayer 后端、前台服务、ICY 元数据、播放列表解析
+│   ├── Services/                  移动端对话框 / Shell 降级实现
+│   └── Views/MobileMainView.axaml 手机布局（分类胶囊 + 电台列表 + 底部播放条）
 ├── packaging/                     Linux .desktop 与图标
 ├── scripts/                       构建、打包与依赖安装脚本
 └── .github/workflows/             CI 自动构建与发布
@@ -161,6 +223,7 @@ NetRadio/
 | --- | --- |
 | Windows | `%APPDATA%\NetRadio\` |
 | Linux | `~/.config/NetRadio/` |
+| Android | 应用私有目录 `Android/data/com.open96.netradio/files/`（无需存储权限） |
 
 - `settings.json` — 音量、主题、缓冲、录音目录、上次收听的电台
 - `favorites.json` — 收藏
@@ -182,10 +245,11 @@ NetRadio/
    ```
 
 4. CI 先在独立的 `version` 任务里解析版本号（tag `v1.2.0` → `1.2.0`，非 tag 构建为 `0.0.0-ci`），
-   再在 `windows-latest` 与 `ubuntu-latest` 上分别构建。Actions 构建制品（Artifact）按
-   `NetRadio-<版本>-<架构>` 命名，例如 `NetRadio-1.2.0-win-x64`。
+   再在 `windows-latest` 与 `ubuntu-latest` 上构建桌面三平台，并由独立的 `android` 任务构建 APK。
+   Actions 构建制品（Artifact）按 `NetRadio-<版本>-<架构>` 命名，例如 `NetRadio-1.2.0-win-x64`、`NetRadio-1.2.0-android`。
 5. tag 构建会把 `NetRadio-<版本>-win-x64.zip`、`NetRadio-<版本>-linux-x64.tar.gz`、
-   `NetRadio-<版本>-linux-arm64.tar.gz` 及各自的 `.sha256` 自动附加到新建的 GitHub Release 上。
+   `NetRadio-<版本>-linux-arm64.tar.gz`、`NetRadio-<版本>-android.apk` 及各自的 `.sha256`
+   自动附加到新建的 GitHub Release 上。
 
 推送到 `main` 或提交 PR 时只做构建验证，不会创建 Release。也可以在 Actions 页面手动触发。
 
@@ -209,6 +273,16 @@ Linux：未安装系统 libvlc，见上方 Linux 依赖说明。
 
 **Windows 发布包体积较大**
 约 430 MB，绝大部分是 `libvlc/win-x64/plugins`（完整解码插件）。如需瘦身，可删除用不到的插件目录（如 `video_output`、`video_filter`）。
+
+**Android 安装时提示「应用未安装」**
+多为系统拦截未知来源安装，或设备为 x86 架构（少数模拟器）。发布包支持 `arm64-v8a` 与 `armeabi-v7a`，
+请在「设置 → 安全 → 安装未知应用」中放行文件管理器后重试。
+
+**Android 切到后台后播放停止 / 通知栏没有播放控制**
+Android 13+ 需要允许通知权限，前台服务才能常驻通知并保持播放；同时建议在系统设置里关闭对该应用的电池优化。
+
+**Android 版为什么没有托盘、小窗口、录音**
+移动端没有托盘与小窗口概念，这两项属于桌面特性；录音功能暂未在 Android 上实现。
 
 ## 许可
 

@@ -20,6 +20,18 @@
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
 
+  <!--
+    Android 头项目（Android/）直接链接共享源码，但它有自己的 App/视图/平台服务，
+    不能混进桌面程序集：把该目录从默认通配项里排除。
+  -->
+  <ItemGroup>
+    <Compile Remove="Android\**" />
+    <AvaloniaXaml Remove="Android\**" />
+    <AvaloniaResource Remove="Android\**" />
+    <None Remove="Android\**" />
+    <EmbeddedResource Remove="Android\**" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.1.4" />
     <PackageReference Include="Avalonia.Desktop" Version="12.1.4" />
