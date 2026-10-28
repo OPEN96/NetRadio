@@ -40,6 +40,8 @@
 - 发布产物不再包含 `.pdb` 调试符号。
 - 制品文件名带上版本号：`NetRadio-<版本>-<架构>.zip` / `.tar.gz`（如 `NetRadio-1.2.0-linux-x64.tar.gz`），
   校验文件同名；打包脚本省略版本参数时自动读取 `NetRadio.csproj` 的 `<Version>`。
+- CI 增加独立的 `version` 任务统一解析版本号并输出给各构建任务，Actions 构建制品名同样为
+  `NetRadio-<版本>-<架构>`；非 tag 构建（main / PR / 手动触发）版本号取 `0.0.0-ci`。
 - 体积：Windows x64 制品 175MB → **36MB**（单文件 exe 85MB）。
 
 ## [1.0.0] - 2026-10-27

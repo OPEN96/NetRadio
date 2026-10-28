@@ -181,8 +181,10 @@ NetRadio/
    git push origin v1.0.0
    ```
 
-4. CI 会在 `windows-latest` 与 `ubuntu-latest` 上分别构建，
-   然后把 `NetRadio-<版本>-win-x64.zip`、`NetRadio-<版本>-linux-x64.tar.gz`、
+4. CI 先在独立的 `version` 任务里解析版本号（tag `v1.2.0` → `1.2.0`，非 tag 构建为 `0.0.0-ci`），
+   再在 `windows-latest` 与 `ubuntu-latest` 上分别构建。Actions 构建制品（Artifact）按
+   `NetRadio-<版本>-<架构>` 命名，例如 `NetRadio-1.2.0-win-x64`。
+5. tag 构建会把 `NetRadio-<版本>-win-x64.zip`、`NetRadio-<版本>-linux-x64.tar.gz`、
    `NetRadio-<版本>-linux-arm64.tar.gz` 及各自的 `.sha256` 自动附加到新建的 GitHub Release 上。
 
 推送到 `main` 或提交 PR 时只做构建验证，不会创建 Release。也可以在 Actions 页面手动触发。
