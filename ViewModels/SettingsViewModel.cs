@@ -11,7 +11,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
     public SettingsViewModel(AppSettings settings)
     {
         _settings = settings;
-        _theme = settings.Theme;
+        // 设置里存的是 Light/Dark/Default 这类键，界面下拉用的是中文显示名，需先转换
+        _theme = ThemeDisplayName(settings.Theme);
         _autoPlayLastStation = settings.AutoPlayLastStation;
         _networkCachingMs = settings.NetworkCachingMs;
         _recordingsFolder = settings.RecordingsFolder;

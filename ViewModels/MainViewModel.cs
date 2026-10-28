@@ -62,6 +62,12 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
 
         Categories = new ObservableCollection<CategoryItem>(BuildCategories());
         SelectedCategory = Categories.FirstOrDefault();
+
+        Stations.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(HasStations));
+            OnPropertyChanged(nameof(IsEmpty));
+        };
     }
 
     // ---------------- 集合与状态 ----------------
@@ -76,7 +82,9 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty] private string _searchText = string.Empty;
 
-    [ObservableProperty] private bool _isBusy;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEmpty))]
+    private bool _isBusy;
 
     [ObservableProperty] private string _statusMessage = string.Empty;
 
@@ -110,6 +118,12 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private string _sleepTimerText = string.Empty;
 
     public bool HasCurrentStation => CurrentStation is not null;
+
+    /// <summary>列表是否已有内容。</summary>
+    public bool HasStations => Stations.Count > 0;
+
+    /// <summary>列表为空且不在加载中（用于展示空状态占位）。</summary>
+    public bool IsEmpty => !HasStations && !IsBusy;
 
     public bool CanSwitchStation => Stations.Count > 0;
 

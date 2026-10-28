@@ -6,8 +6,8 @@
         x:Class="NetRadio.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Width="1180" Height="760"
-        MinWidth="940" MinHeight="600"
+        Width="1200" Height="780"
+        MinWidth="960" MinHeight="620"
         Background="{DynamicResource AppBackgroundBrush}"
         Title="{Binding WindowTitle}">
 
@@ -23,349 +23,487 @@
     </Window.Resources>
 
     <Window.Styles>
-        <Style Selector="Button.icon">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Padding" Value="8" />
-            <Setter Property="CornerRadius" Value="8" />
-        </Style>
-        <Style Selector="Button.icon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
-        </Style>
-
-        <Style Selector="ListBoxItem">
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Margin" Value="0" />
-            <Setter Property="MinHeight" Value="0" />
-        </Style>
-
-        <Style Selector="Border.stationCard">
-            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}" />
-        </Style>
-        <Style Selector="ListBoxItem:pointerover Border.stationCard">
-            <Setter Property="Background" Value="{DynamicResource CardHoverBrush}" />
-        </Style>
-        <Style Selector="ListBoxItem:selected Border.stationCard">
-            <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColor}" />
-            <Setter Property="BorderThickness" Value="2" />
-        </Style>
-
-        <Style Selector="TextBlock.section">
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
-        </Style>
-
-        <Style Selector="Ellipse.onAir">
-            <Setter Property="Fill" Value="{DynamicResource OnAirBrush}" />
-            <Setter Property="Width" Value="10" />
-            <Setter Property="Height" Value="10" />
+        <!-- 正在播放的跳动电平条 -->
+        <Style Selector="Border.eqBar">
+            <Setter Property="Width" Value="3" />
+            <Setter Property="Height" Value="4" />
+            <Setter Property="CornerRadius" Value="1.5" />
+            <Setter Property="Background" Value="{DynamicResource OnAirBrush}" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="Opacity" Value="0.85" />
             <Style.Animations>
-                <Animation Duration="0:0:1.4" IterationCount="INFINITE">
+                <Animation Duration="0:0:0.9" IterationCount="INFINITE" Easing="SineEaseInOut">
                     <KeyFrame Cue="0%">
-                        <Setter Property="Opacity" Value="1" />
+                        <Setter Property="Height" Value="4" />
                     </KeyFrame>
-                    <KeyFrame Cue="50%">
-                        <Setter Property="Opacity" Value="0.25" />
+                    <KeyFrame Cue="45%">
+                        <Setter Property="Height" Value="15" />
                     </KeyFrame>
                     <KeyFrame Cue="100%">
-                        <Setter Property="Opacity" Value="1" />
+                        <Setter Property="Height" Value="4" />
                     </KeyFrame>
                 </Animation>
             </Style.Animations>
         </Style>
+
+        <Style Selector="Border.eqBar.b2">
+            <Style.Animations>
+                <Animation Duration="0:0:1.15" Delay="0:0:0.12" IterationCount="INFINITE" Easing="SineEaseInOut">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="Height" Value="12" />
+                    </KeyFrame>
+                    <KeyFrame Cue="50%">
+                        <Setter Property="Height" Value="4" />
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="Height" Value="12" />
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+
+        <Style Selector="Border.eqBar.b3">
+            <Style.Animations>
+                <Animation Duration="0:0:0.78" Delay="0:0:0.26" IterationCount="INFINITE" Easing="SineEaseInOut">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="Height" Value="5" />
+                    </KeyFrame>
+                    <KeyFrame Cue="40%">
+                        <Setter Property="Height" Value="16" />
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="Height" Value="5" />
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+
+        <Style Selector="Border.eqBar.b4">
+            <Style.Animations>
+                <Animation Duration="0:0:1.02" Delay="0:0:0.4" IterationCount="INFINITE" Easing="SineEaseInOut">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="Height" Value="9" />
+                    </KeyFrame>
+                    <KeyFrame Cue="60%">
+                        <Setter Property="Height" Value="3" />
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="Height" Value="9" />
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+
     </Window.Styles>
 
     <Grid RowDefinitions="Auto,*,Auto">
 
-        <!-- ============ 顶部栏 ============ -->
-        <Border Grid.Row="0" Height="60"
+        <!-- ==================== 顶部栏 ==================== -->
+        <Border Grid.Row="0" Height="64"
                 Background="{DynamicResource PanelBackgroundBrush}"
                 BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="0,0,0,1">
-            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" Margin="16,0">
+            <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto,Auto" Margin="20,0">
 
-                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                    <Border Width="34" Height="34" CornerRadius="10" Background="{DynamicResource OnAirBrush}">
-                        <PathIcon Data="{StaticResource IconBroadcast}" Width="20" Height="20" Foreground="White" />
+                <!-- 品牌 -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="11" VerticalAlignment="Center">
+                    <Border Width="34" Height="34" CornerRadius="11"
+                            Background="{DynamicResource AccentGradientBrush}"
+                            BoxShadow="0 4 12 0 #33F2552E">
+                        <PathIcon Data="{StaticResource IconBroadcast}" Width="19" Height="19" Foreground="White" />
                     </Border>
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="NetRadio" FontSize="16" FontWeight="Bold"
+                    <StackPanel VerticalAlignment="Center" Spacing="1">
+                        <TextBlock Text="NetRadio" FontSize="15" FontWeight="Bold"
                                    Foreground="{DynamicResource TextPrimaryBrush}" />
-                        <TextBlock Text="网络收音机" FontSize="11"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBlock Text="网络收音机" FontSize="10.5" LetterSpacing="0.6"
+                                   Foreground="{DynamicResource TextTertiaryBrush}" />
                     </StackPanel>
                 </StackPanel>
 
-                <TextBox Grid.Column="1" Margin="24,0,0,0" Height="36" Width="340"
-                         HorizontalAlignment="Left" VerticalAlignment="Center"
-                         PlaceholderText="搜索电台名称，例如 华语、jazz、BBC…"
-                         Text="{Binding SearchText, Mode=TwoWay}"
-                         CornerRadius="18" />
+                <!-- 搜索：外层圆角容器 + 内嵌无边框输入 -->
+                <Border Grid.Column="1" Width="360" Height="38" Margin="30,0,0,0"
+                        VerticalAlignment="Center" CornerRadius="19"
+                        Background="{DynamicResource SubtleSurfaceBrush}"
+                        BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="1">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <PathIcon Grid.Column="0" Data="{StaticResource IconSearch}" Width="15" Height="15"
+                                  Margin="14,0,0,0" VerticalAlignment="Center"
+                                  Foreground="{DynamicResource TextTertiaryBrush}" />
+                        <TextBox Grid.Column="1" Classes="inline" Margin="9,0,4,0"
+                                 Text="{Binding SearchText, Mode=TwoWay}"
+                                 PlaceholderText="搜索电台名称，例如 华语、jazz、BBC…" />
+                    </Grid>
+                </Border>
 
-                <Button Grid.Column="2" Classes="icon" Margin="4,0"
-                        Command="{Binding RefreshCommand}" ToolTip.Tip="刷新电台列表">
-                    <PathIcon Data="{StaticResource IconRefresh}" Width="18" Height="18" />
-                </Button>
-                <Button Grid.Column="3" Classes="icon" Margin="4,0"
-                        Command="{Binding AddStationCommand}" ToolTip.Tip="添加自定义电台">
-                    <PathIcon Data="{StaticResource IconPlus}" Width="18" Height="18" />
-                </Button>
-                <Button Grid.Column="4" Classes="icon" Margin="4,0"
+                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+                    <Button Classes="icon" Width="38" Height="38" Padding="0"
+                            Command="{Binding RefreshCommand}" ToolTip.Tip="刷新电台列表">
+                        <PathIcon Data="{StaticResource IconRefresh}" Width="17" Height="17"
+                                  Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </Button>
+                    <Button Classes="icon" Width="38" Height="38" Padding="0"
+                            Command="{Binding AddStationCommand}" ToolTip.Tip="添加自定义电台">
+                        <PathIcon Data="{StaticResource IconPlus}" Width="17" Height="17"
+                                  Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </Button>
+                </StackPanel>
+
+                <Border Grid.Column="4" Width="1" Height="20" Margin="6,0"
+                        Background="{DynamicResource BorderBrushSoft}" VerticalAlignment="Center" />
+
+                <Button Grid.Column="5" Classes="icon" Width="38" Height="38" Padding="0"
                         Command="{Binding ToggleMiniPlayerCommand}" ToolTip.Tip="小窗口播放模式">
-                    <PathIcon Data="{StaticResource IconMiniPlayer}" Width="18" Height="18" />
+                    <PathIcon Data="{StaticResource IconMiniPlayer}" Width="17" Height="17"
+                              Foreground="{DynamicResource TextSecondaryBrush}" />
                 </Button>
-                <Button Grid.Column="5" Classes="icon" Margin="4,0"
+                <Button Grid.Column="6" Classes="icon" Width="38" Height="38" Padding="0"
                         Command="{Binding OpenSettingsCommand}" ToolTip.Tip="设置">
-                    <PathIcon Data="{StaticResource IconSettings}" Width="18" Height="18" />
+                    <PathIcon Data="{StaticResource IconSettings}" Width="17" Height="17"
+                              Foreground="{DynamicResource TextSecondaryBrush}" />
                 </Button>
             </Grid>
         </Border>
 
-        <!-- ============ 主体 ============ -->
-        <Grid Grid.Row="1" ColumnDefinitions="216,*">
+        <!-- ==================== 主体 ==================== -->
+        <Grid Grid.Row="1" ColumnDefinitions="236,*">
 
-            <!-- 侧边分类 -->
+            <!-- ===== 侧边栏 ===== -->
             <Border Grid.Column="0" Background="{DynamicResource PanelBackgroundBrush}"
                     BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="0,0,1,0">
                 <Grid RowDefinitions="Auto,*,Auto">
-                    <TextBlock Grid.Row="0" Classes="section" Text="分类" Margin="18,16,0,8" />
 
-                    <ListBox Grid.Row="1" ItemsSource="{Binding Categories}"
+                    <TextBlock Grid.Row="0" Classes="label" Text="浏览" Margin="22,20,0,10" />
+
+                    <ListBox Grid.Row="1" Classes="nav"
+                             ItemsSource="{Binding Categories}"
                              SelectedItem="{Binding SelectedCategory}"
-                             Background="Transparent" BorderThickness="0"
-                             Margin="8,0,8,0" Padding="0">
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.ItemTemplate>
                             <DataTemplate x:DataType="models:CategoryItem">
-                                <Grid ColumnDefinitions="Auto,*,Auto" Margin="10,7" VerticalAlignment="Center">
-                                    <PathIcon Grid.Column="0" Width="16" Height="16"
-                                              Data="{Binding Icon}"
-                                              Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <TextBlock Grid.Column="1" Text="{Binding Name}" Margin="12,0,0,0"
-                                               FontSize="13.5" VerticalAlignment="Center"
-                                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <Grid ColumnDefinitions="Auto,*" Margin="13,10">
+                                    <PathIcon Grid.Column="0" Classes="catIcon" Width="16" Height="16"
+                                              Data="{Binding Icon}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Classes="catName" Text="{Binding Name}"
+                                               Margin="12,0,0,0" FontSize="13" VerticalAlignment="Center" />
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <Border Grid.Row="2" Padding="18,12" BorderBrush="{DynamicResource BorderBrushSoft}"
-                            BorderThickness="0,1,0,0">
-                        <StackPanel Spacing="4">
-                            <TextBlock FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}">
-                                <Run Text="收藏 " />
-                                <Run Text="{Binding FavoriteCount}" />
-                            </TextBlock>
-                            <TextBlock FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}">
-                                <Run Text="自定义 " />
-                                <Run Text="{Binding CustomCount}" />
-                            </TextBlock>
-                        </StackPanel>
+                    <!-- 底部统计 -->
+                    <Border Grid.Row="2" Margin="12,8,12,14" Padding="14,12"
+                            Background="{DynamicResource SubtleSurfaceBrush}" CornerRadius="12">
+                        <Grid ColumnDefinitions="*,Auto,*">
+                            <StackPanel Grid.Column="0" Spacing="3">
+                                <TextBlock Text="{Binding FavoriteCount}" FontSize="16" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBlock Text="收藏" FontSize="10.5"
+                                           Foreground="{DynamicResource TextTertiaryBrush}" />
+                            </StackPanel>
+                            <Border Grid.Column="1" Width="1" Margin="8,2" Background="{DynamicResource BorderBrushSoft}" />
+                            <StackPanel Grid.Column="2" Spacing="3" Margin="12,0,0,0">
+                                <TextBlock Text="{Binding CustomCount}" FontSize="16" FontWeight="Bold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBlock Text="我的电台" FontSize="10.5"
+                                           Foreground="{DynamicResource TextTertiaryBrush}" />
+                            </StackPanel>
+                        </Grid>
                     </Border>
                 </Grid>
             </Border>
 
-            <!-- 右侧内容 -->
-            <Grid Grid.Row="0" Grid.Column="1" RowDefinitions="Auto,Auto,*">
+            <!-- ===== 内容区 ===== -->
+            <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*">
 
-                <!-- 正在播放 -->
-                <Border Grid.Row="0" Margin="16,14,16,0" Padding="16" CornerRadius="14"
+                <!-- 正在收听：强调卡片 -->
+                <Border Grid.Row="0" Margin="20,18,20,0" CornerRadius="18"
                         Background="{DynamicResource HeroBrush}"
-                        BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="1"
+                        BorderBrush="{DynamicResource HeroBorderBrush}" BorderThickness="1"
+                        BoxShadow="0 8 24 0 #121A1D24"
                         IsVisible="{Binding HasCurrentStation}">
-                    <Grid ColumnDefinitions="Auto,*,Auto">
-                        <Border Grid.Column="0" Width="60" Height="60" CornerRadius="30"
-                                Background="{Binding CurrentStation.Name, Converter={StaticResource StationAvatar}}">
-                            <TextBlock Text="{Binding CurrentStation.Name, Converter={StaticResource StationInitial}}"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       FontSize="24" FontWeight="Bold" Foreground="White" />
-                        </Border>
-
-                        <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Ellipse Classes="onAir" VerticalAlignment="Center"
-                                         IsVisible="{Binding IsPlaying}" />
-                                <TextBlock Text="{Binding CurrentStation.Name}" FontSize="17" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource TextPrimaryBrush}" />
-                            </StackPanel>
-                            <TextBlock Margin="0,4,0,0" FontSize="12.5"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"
-                                       Text="{Binding StatusText}" />
-                            <TextBlock Margin="0,2,0,0" FontSize="13"
-                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                       Text="{Binding NowPlaying}"
-                                       IsVisible="{Binding NowPlaying, Converter={StaticResource NotEmpty}}"
-                                       TextTrimming="CharacterEllipsis" />
-                        </StackPanel>
-
-                        <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="11.5"
-                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                   Text="{Binding CurrentStation.DisplaySubtitle}" />
-                    </Grid>
-                </Border>
-
-                <!-- 状态条 -->
-                <Border Grid.Row="1" Margin="16,12,16,0">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" FontSize="12"
-                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                   VerticalAlignment="Center" />
-                        <ProgressBar Grid.Column="1" Width="140" IsIndeterminate="True" Height="3"
-                                     IsVisible="{Binding IsBusy}" />
-                    </Grid>
-                </Border>
-
-                <!-- 电台卡片列表 -->
-                <ListBox x:Name="StationList" Grid.Row="2" Margin="8,8,8,8"
-                         ItemsSource="{Binding Stations}"
-                         SelectedItem="{Binding SelectedStation}"
-                         Background="Transparent" BorderThickness="0"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                    <ListBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal" />
-                        </ItemsPanelTemplate>
-                    </ListBox.ItemsPanel>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate x:DataType="models:RadioStation">
-                            <Border Classes="stationCard" Width="264" Margin="6" Padding="12"
-                                    CornerRadius="12" BorderBrush="{DynamicResource BorderBrushSoft}"
-                                    BorderThickness="1">
-                                <Grid ColumnDefinitions="46,*,Auto" RowDefinitions="Auto,Auto">
-
-                                    <Border Grid.Row="0" Grid.Column="0" Width="46" Height="46" CornerRadius="23"
-                                            VerticalAlignment="Top"
-                                            Background="{Binding Name, Converter={StaticResource StationAvatar}}">
-                                        <TextBlock Text="{Binding Name, Converter={StaticResource StationInitial}}"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                   FontSize="18" FontWeight="SemiBold" Foreground="White" />
-                                    </Border>
-
-                                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="12,0,8,0">
-                                        <TextBlock Text="{Binding Name}" FontSize="13.5" FontWeight="SemiBold"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Foreground="{DynamicResource TextPrimaryBrush}" />
-                                        <TextBlock Margin="0,3,0,0" FontSize="11.5" Opacity="0.7"
-                                                   Text="{Binding DisplaySubtitle}"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Foreground="{DynamicResource TextPrimaryBrush}" />
-                                        <TextBlock Margin="0,3,0,0" FontSize="11" Opacity="0.55"
-                                                   Text="{Binding DisplayTags}"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Foreground="{DynamicResource TextPrimaryBrush}" />
-                                    </StackPanel>
-
-                                    <Button Grid.Row="0" Grid.Column="2" Width="36" Height="36"
-                                            CornerRadius="18" Padding="0" BorderThickness="0"
-                                            VerticalAlignment="Top"
-                                            Background="{DynamicResource SystemAccentColor}"
-                                            ToolTip.Tip="播放"
-                                            Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).PlayCommand}"
-                                            CommandParameter="{Binding}">
-                                        <PathIcon Data="{StaticResource IconPlay}" Width="16" Height="16"
-                                                  Foreground="White" />
-                                    </Button>
-
-                                    <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
-                                                Orientation="Horizontal" Margin="12,8,0,0" Spacing="2">
-                                        <Button Classes="icon" Padding="6" ToolTip.Tip="收藏 / 取消收藏"
-                                                Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).ToggleFavoriteCommand}"
-                                                CommandParameter="{Binding}">
-                                            <PathIcon Width="15" Height="15" Foreground="#F5B301"
-                                                      Data="{Binding IsFavorite, Converter={StaticResource FavoriteIcon}}" />
-                                        </Button>
-                                        <Button Classes="icon" Padding="6" ToolTip.Tip="编辑"
-                                                IsVisible="{Binding IsCustom}"
-                                                Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).EditStationCommand}"
-                                                CommandParameter="{Binding}">
-                                            <PathIcon Data="{StaticResource IconEdit}" Width="15" Height="15" />
-                                        </Button>
-                                        <Button Classes="icon" Padding="6" ToolTip.Tip="删除"
-                                                IsVisible="{Binding IsCustom}"
-                                                Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).DeleteStationCommand}"
-                                                CommandParameter="{Binding}">
-                                            <PathIcon Data="{StaticResource IconDelete}" Width="15" Height="15" />
-                                        </Button>
-                                    </StackPanel>
+                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="20,18">
+                            <!-- 台标 -->
+                            <Border Grid.Column="0" Width="76" Height="76" CornerRadius="19" Classes="avatar"
+                                    Background="{Binding CurrentStation.Name, Converter={StaticResource StationAvatar}}"
+                                    BoxShadow="0 6 16 0 #26000000">
+                                <Grid>
+                                    <Border Classes="gloss" CornerRadius="19" />
+                                    <TextBlock Text="{Binding CurrentStation.Name, Converter={StaticResource StationInitial}}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               FontSize="30" FontWeight="Bold" Foreground="#F2FFFFFF" />
                                 </Grid>
                             </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+
+                            <!-- 台名 / 状态 -->
+                            <StackPanel Grid.Column="1" Margin="18,0,12,0" VerticalAlignment="Center" Spacing="5">
+                                <TextBlock Classes="label" Text="正在收听" />
+
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Text="{Binding CurrentStation.Name}" FontSize="19" FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    <StackPanel Orientation="Horizontal" Spacing="3" VerticalAlignment="Center"
+                                                IsVisible="{Binding IsPlaying}">
+                                        <Border Classes="eqBar" />
+                                        <Border Classes="eqBar b2" />
+                                        <Border Classes="eqBar b3" />
+                                        <Border Classes="eqBar b4" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+                                    <Ellipse Classes="onAir" IsVisible="{Binding IsPlaying}" />
+                                    <TextBlock Text="{Binding StatusText}" FontSize="12"
+                                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBlock Text="·" FontSize="12"
+                                               Foreground="{DynamicResource TextTertiaryBrush}" />
+                                    <TextBlock Text="{Binding CurrentStation.DisplaySubtitle}" FontSize="11.5"
+                                               TextTrimming="CharacterEllipsis"
+                                               Foreground="{DynamicResource TextTertiaryBrush}" />
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,1,0,0"
+                                            IsVisible="{Binding NowPlaying, Converter={StaticResource NotEmpty}}">
+                                    <PathIcon Data="{StaticResource IconMusicNote}" Width="12" Height="12"
+                                              VerticalAlignment="Center"
+                                              Foreground="{DynamicResource AccentBrush}" />
+                                    <TextBlock Text="{Binding NowPlaying}" FontSize="12.5"
+                                               TextTrimming="CharacterEllipsis" MaxWidth="520"
+                                               Foreground="{DynamicResource TextPrimaryBrush}" Opacity="0.8" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- 快捷操作 -->
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Button Classes="chipIcon" Width="38" Height="38" ToolTip.Tip="收藏 / 取消收藏"
+                                        Command="{Binding ToggleFavoriteCommand}"
+                                        CommandParameter="{Binding CurrentStation}">
+                                    <PathIcon Width="17" Height="17" Foreground="#F5A524"
+                                              Data="{Binding CurrentStation.IsFavorite, Converter={StaticResource FavoriteIcon}}" />
+                                </Button>
+                                <Button Classes="chipIcon" Width="38" Height="38" ToolTip.Tip="录制当前电台"
+                                        Command="{Binding ToggleRecordingCommand}">
+                                    <PathIcon Width="17" Height="17" Foreground="#E4572E"
+                                              Data="{Binding IsRecording, Converter={StaticResource RecordIcon}}" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                </Border>
+
+                <!-- 列表标题行 -->
+                <Grid Grid.Row="1" Margin="22,20,22,4" ColumnDefinitions="Auto,*,Auto">
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <TextBlock Classes="title" Text="{Binding SelectedCategory.Name}" VerticalAlignment="Center" />
+                        <Border Classes="chip" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding StatusMessage}" FontSize="10.5"
+                                       Foreground="{DynamicResource ChipTextBrush}" />
+                        </Border>
+                    </StackPanel>
+
+                    <ProgressBar Grid.Column="2" Width="110" Height="3" IsIndeterminate="True"
+                                 VerticalAlignment="Center" IsVisible="{Binding IsBusy}" />
+                </Grid>
+
+                <!-- 电台卡片 -->
+                <Grid Grid.Row="2">
+                    <ListBox x:Name="StationList" Classes="stations" Margin="10,4,10,10"
+                             ItemsSource="{Binding Stations}"
+                             SelectedItem="{Binding SelectedStation}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="models:RadioStation">
+                                <Border Classes="stationCard" Width="284" Margin="6" Padding="14">
+                                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto">
+
+                                        <Border Grid.Row="0" Grid.Column="0" Width="52" Height="52"
+                                                CornerRadius="15" Classes="avatar"
+                                                Background="{Binding Name, Converter={StaticResource StationAvatar}}">
+                                            <Grid>
+                                                <Border Classes="gloss" CornerRadius="15" />
+                                                <TextBlock Text="{Binding Name, Converter={StaticResource StationInitial}}"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                           FontSize="20" FontWeight="Bold" Foreground="#F2FFFFFF" />
+                                            </Grid>
+                                        </Border>
+
+                                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="12,0,8,0"
+                                                    VerticalAlignment="Center" Spacing="3">
+                                            <TextBlock Text="{Binding Name}" FontSize="13.5" FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}" />
+                                            <TextBlock Text="{Binding DisplaySubtitle}" FontSize="11"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Foreground="{DynamicResource TextTertiaryBrush}" />
+                                        </StackPanel>
+
+                                        <Border Grid.Row="0" Grid.Column="2" Width="36" Height="36" CornerRadius="18"
+                                                VerticalAlignment="Top" BoxShadow="0 4 10 0 #30F2552E">
+                                            <Button Classes="round" Width="36" Height="36" ToolTip.Tip="播放"
+                                                    Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).PlayCommand}"
+                                                    CommandParameter="{Binding}">
+                                                <PathIcon Data="{StaticResource IconPlay}" Width="15" Height="15"
+                                                          Foreground="White" Margin="2,0,0,0" />
+                                            </Button>
+                                        </Border>
+
+                                        <!-- 标签 -->
+                                        <ItemsControl Grid.Row="1" Grid.Column="1" Margin="12,10,8,0"
+                                                      ItemsSource="{Binding TagList}" VerticalAlignment="Center">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal" Spacing="5" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="x:String">
+                                                    <Border Classes="chip">
+                                                        <TextBlock Text="{Binding}" FontSize="10" MaxWidth="86"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   Foreground="{DynamicResource ChipTextBrush}" />
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+
+                                        <!-- 行内操作 -->
+                                        <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal"
+                                                    Spacing="1" Margin="0,8,0,0" HorizontalAlignment="Right">
+                                            <Button Classes="icon" Width="28" Height="28" Padding="0"
+                                                    ToolTip.Tip="收藏 / 取消收藏"
+                                                    Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).ToggleFavoriteCommand}"
+                                                    CommandParameter="{Binding}">
+                                                <PathIcon Width="14" Height="14" Foreground="#F5A524"
+                                                          Data="{Binding IsFavorite, Converter={StaticResource FavoriteIcon}}" />
+                                            </Button>
+                                            <Button Classes="icon" Width="28" Height="28" Padding="0" ToolTip.Tip="编辑"
+                                                    IsVisible="{Binding IsCustom}"
+                                                    Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).EditStationCommand}"
+                                                    CommandParameter="{Binding}">
+                                                <PathIcon Data="{StaticResource IconEdit}" Width="14" Height="14"
+                                                          Foreground="{DynamicResource TextTertiaryBrush}" />
+                                            </Button>
+                                            <Button Classes="icon" Width="28" Height="28" Padding="0" ToolTip.Tip="删除"
+                                                    IsVisible="{Binding IsCustom}"
+                                                    Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).DeleteStationCommand}"
+                                                    CommandParameter="{Binding}">
+                                                <PathIcon Data="{StaticResource IconDelete}" Width="14" Height="14"
+                                                          Foreground="{DynamicResource TextTertiaryBrush}" />
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- 空状态 -->
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12"
+                                IsVisible="{Binding IsEmpty}" Margin="0,0,0,60">
+                        <Border Width="72" Height="72" CornerRadius="22" HorizontalAlignment="Center"
+                                Background="{DynamicResource SubtleSurfaceBrush}"
+                                BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="1">
+                            <PathIcon Data="{StaticResource IconBroadcast}" Width="28" Height="28"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                                      Foreground="{DynamicResource TextTertiaryBrush}" />
+                        </Border>
+                        <TextBlock Text="这里还没有电台" FontSize="14" FontWeight="SemiBold"
+                                   HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Text="{Binding StatusMessage}" FontSize="12" HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </StackPanel>
+                </Grid>
             </Grid>
         </Grid>
 
-        <!-- ============ 底部播放条 ============ -->
-        <Border Grid.Row="2" Height="92" Background="{DynamicResource PlayerBarBrush}"
-                BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="0,1,0,0">
-            <Grid ColumnDefinitions="260,*,300" Margin="16,0">
+        <!-- ==================== 底部播放条 ==================== -->
+        <Border Grid.Row="2" Height="96"
+                Background="{DynamicResource PlayerBarBrush}"
+                BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="0,1,0,0"
+                BoxShadow="0 -6 20 0 #0A1A1D24">
+            <Grid ColumnDefinitions="280,*,300" Margin="20,0">
 
                 <!-- 当前电台 -->
                 <Grid Grid.Column="0" ColumnDefinitions="Auto,*" VerticalAlignment="Center">
-                    <Border Grid.Column="0" Width="46" Height="46" CornerRadius="23"
+                    <Border Grid.Column="0" Width="46" Height="46" CornerRadius="14" Classes="avatar"
                             Background="{Binding CurrentStation.Name, Converter={StaticResource StationAvatar}}">
-                        <TextBlock Text="{Binding CurrentStation.Name, Converter={StaticResource StationInitial}}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   FontSize="18" FontWeight="SemiBold" Foreground="White" />
+                        <Grid>
+                            <Border Classes="gloss" CornerRadius="14" />
+                            <TextBlock Text="{Binding CurrentStation.Name, Converter={StaticResource StationInitial}}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       FontSize="18" FontWeight="Bold" Foreground="#F2FFFFFF" />
+                        </Grid>
                     </Border>
-                    <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Spacing="3">
                         <TextBlock Text="{Binding CurrentStation.Name}" FontSize="13" FontWeight="SemiBold"
                                    TextTrimming="CharacterEllipsis"
                                    Foreground="{DynamicResource TextPrimaryBrush}" />
-                        <TextBlock Margin="0,2,0,0" FontSize="11.5" Text="{Binding StatusText}"
+                        <TextBlock Text="{Binding StatusText}" FontSize="11"
+                                   TextTrimming="CharacterEllipsis"
                                    Foreground="{DynamicResource TextSecondaryBrush}" />
                     </StackPanel>
                 </Grid>
 
-                <!-- 控制按钮 -->
+                <!-- 传输控制 -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center"
-                            VerticalAlignment="Center" Spacing="8">
-                    <Button Classes="icon" Width="40" Height="40" Padding="0"
-                            Command="{Binding StopCommand}" ToolTip.Tip="停止">
-                        <PathIcon Data="{StaticResource IconStop}" Width="16" Height="16" />
-                    </Button>
-
-                    <Button Classes="icon" Width="40" Height="40" Padding="0"
+                            VerticalAlignment="Center" Spacing="10">
+                    <Button Classes="icon" Width="38" Height="38" Padding="0"
                             Command="{Binding PlayPreviousCommand}" ToolTip.Tip="上一曲"
                             IsEnabled="{Binding CanSwitchStation}">
-                        <PathIcon Data="{StaticResource IconPrevious}" Width="16" Height="16" />
+                        <PathIcon Data="{StaticResource IconPrevious}" Width="17" Height="17"
+                                  Foreground="{DynamicResource TextSecondaryBrush}" />
                     </Button>
 
-                    <Button Width="52" Height="52" CornerRadius="26" Padding="0" BorderThickness="0"
-                            Background="{DynamicResource SystemAccentColor}"
-                            Command="{Binding TogglePlayPauseCommand}" ToolTip.Tip="播放 / 暂停">
-                        <PathIcon Width="22" Height="22" Foreground="White"
-                                  Data="{Binding IsPlaying, Converter={StaticResource PlayPauseIcon}}" />
-                    </Button>
+                    <Border Width="54" Height="54" CornerRadius="27" BoxShadow="0 6 16 0 #40F2552E">
+                        <Button Classes="round" Width="54" Height="54"
+                                Command="{Binding TogglePlayPauseCommand}" ToolTip.Tip="播放 / 暂停">
+                            <PathIcon Width="21" Height="21" Foreground="White"
+                                      Data="{Binding IsPlaying, Converter={StaticResource PlayPauseIcon}}" />
+                        </Button>
+                    </Border>
 
-                    <Button Classes="icon" Width="40" Height="40" Padding="0"
+                    <Button Classes="icon" Width="38" Height="38" Padding="0"
                             Command="{Binding PlayNextCommand}" ToolTip.Tip="下一曲"
                             IsEnabled="{Binding CanSwitchStation}">
-                        <PathIcon Data="{StaticResource IconNext}" Width="16" Height="16" />
+                        <PathIcon Data="{StaticResource IconNext}" Width="17" Height="17"
+                                  Foreground="{DynamicResource TextSecondaryBrush}" />
                     </Button>
 
-                    <Button Classes="icon" Width="40" Height="40" Padding="0"
+                    <Button Classes="icon" Width="38" Height="38" Padding="0" Margin="6,0,0,0"
+                            Command="{Binding StopCommand}" ToolTip.Tip="停止">
+                        <PathIcon Data="{StaticResource IconStop}" Width="15" Height="15"
+                                  Foreground="{DynamicResource TextTertiaryBrush}" />
+                    </Button>
+
+                    <Button Classes="icon" Width="38" Height="38" Padding="0"
                             Command="{Binding ToggleRecordingCommand}" ToolTip.Tip="录制当前电台">
-                        <PathIcon Width="16" Height="16" Foreground="#E4572E"
+                        <PathIcon Width="15" Height="15" Foreground="#E4572E"
                                   Data="{Binding IsRecording, Converter={StaticResource RecordIcon}}" />
                     </Button>
                 </StackPanel>
 
-                <!-- 音量 / 定时器 -->
+                <!-- 音量 / 定时 -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right"
-                            VerticalAlignment="Center" Spacing="6">
-                    <Button Classes="icon" Width="36" Height="36" Padding="0"
+                            VerticalAlignment="Center" Spacing="4">
+                    <Button Classes="icon" Width="34" Height="34" Padding="0"
                             Command="{Binding ToggleMuteCommand}" ToolTip.Tip="静音">
-                        <PathIcon Width="18" Height="18"
+                        <PathIcon Width="17" Height="17" Foreground="{DynamicResource TextSecondaryBrush}"
                                   Data="{Binding IsMuted, Converter={StaticResource VolumeIcon}}" />
                     </Button>
-                    <Slider Width="130" Minimum="0" Maximum="100" Value="{Binding Volume, Mode=TwoWay}"
-                            VerticalAlignment="Center" />
-                    <TextBlock Width="32" Text="{Binding Volume}" FontSize="11.5"
+                    <Slider Width="116" Minimum="0" Maximum="100" Margin="2,0,0,0"
+                            Value="{Binding Volume, Mode=TwoWay}" VerticalAlignment="Center" />
+                    <TextBlock Width="26" Text="{Binding Volume}" FontSize="11"
                                VerticalAlignment="Center"
-                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                               Foreground="{DynamicResource TextTertiaryBrush}" />
 
-                    <Button Classes="icon" Width="36" Height="36" Padding="0" ToolTip.Tip="睡眠定时器">
-                        <PathIcon Data="{StaticResource IconTimer}" Width="18" Height="18" />
+                    <Button Classes="icon" Width="34" Height="34" Padding="0" Margin="6,0,0,0"
+                            ToolTip.Tip="睡眠定时器">
+                        <PathIcon Data="{StaticResource IconTimer}" Width="17" Height="17"
+                                  Foreground="{DynamicResource TextSecondaryBrush}" />
                         <Button.Flyout>
                             <MenuFlyout>
                                 <MenuItem Header="关闭定时器"
@@ -381,10 +519,11 @@
                             </MenuFlyout>
                         </Button.Flyout>
                     </Button>
-                    <TextBlock Text="{Binding SleepTimerText}" FontSize="11.5" Width="42"
+
+                    <TextBlock Text="{Binding SleepTimerText}" FontSize="11" Width="40" Margin="2,0,0,0"
                                VerticalAlignment="Center"
                                IsVisible="{Binding IsSleepTimerActive}"
-                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                               Foreground="{DynamicResource AccentBrush}" />
                 </StackPanel>
             </Grid>
         </Border>

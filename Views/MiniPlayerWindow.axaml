@@ -4,7 +4,7 @@
         xmlns:conv="using:NetRadio.Converters"
         x:Class="NetRadio.Views.MiniPlayerWindow"
         x:DataType="vm:MainViewModel"
-        Width="380" Height="204"
+        Width="372" Height="198"
         CanResize="False"
         ShowInTaskbar="True"
         WindowDecorations="None"
@@ -20,114 +20,109 @@
         <conv:VolumeIconConverter x:Key="VolumeIcon" />
     </Window.Resources>
 
-    <Window.Styles>
-        <Style Selector="Button.chrome">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Padding" Value="5" />
-            <Setter Property="CornerRadius" Value="6" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-        <Style Selector="Button.chrome:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
-        </Style>
-        <Style Selector="Button.transport">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Padding" Value="7" />
-            <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-        <Style Selector="Button.transport:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
-        </Style>
-    </Window.Styles>
-
-    <Border BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="1">
-        <Grid RowDefinitions="34,*,Auto" Margin="12,0,12,10">
+    <Border BorderBrush="{DynamicResource BorderBrushStrong}" BorderThickness="1"
+            Background="{DynamicResource PlayerBarBrush}">
+        <Grid RowDefinitions="34,*,Auto" Margin="14,0,14,12">
 
             <!-- ===== 自绘标题栏（可拖拽） ===== -->
             <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto"
                   Background="Transparent"
                   PointerPressed="OnTitleBarPointerPressed">
                 <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                    <PathIcon Data="{StaticResource IconBroadcast}" Width="14" Height="14"
-                              Foreground="{DynamicResource OnAirBrush}" />
-                    <TextBlock Text="NetRadio 小窗口" FontSize="11"
-                               VerticalAlignment="Center"
-                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <Border Width="16" Height="16" CornerRadius="5"
+                            Background="{DynamicResource AccentGradientBrush}">
+                        <PathIcon Data="{StaticResource IconBroadcast}" Width="10" Height="10" Foreground="White" />
+                    </Border>
+                    <TextBlock Text="NetRadio" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextTertiaryBrush}" />
                 </StackPanel>
 
-                <Button x:Name="PinButton" Grid.Column="1" Classes="chrome"
+                <Button x:Name="PinButton" Grid.Column="1" Classes="icon" Width="26" Height="26" Padding="0"
                         Click="OnPinClick" ToolTip.Tip="切换置顶">
-                    <PathIcon Data="{StaticResource IconPin}" Width="13" Height="13" />
+                    <PathIcon Data="{StaticResource IconPin}" Width="12" Height="12"
+                              Foreground="{DynamicResource TextTertiaryBrush}" />
                 </Button>
-                <Button Grid.Column="2" Classes="chrome"
+                <Button Grid.Column="2" Classes="icon" Width="26" Height="26" Padding="0"
                         Command="{Binding ShowMainWindowCommand}" ToolTip.Tip="返回主界面">
-                    <PathIcon Data="{StaticResource IconExpand}" Width="13" Height="13" />
+                    <PathIcon Data="{StaticResource IconExpand}" Width="12" Height="12"
+                              Foreground="{DynamicResource TextTertiaryBrush}" />
                 </Button>
-                <Button Grid.Column="3" Classes="chrome"
+                <Button Grid.Column="3" Classes="icon" Width="26" Height="26" Padding="0"
                         Click="OnCloseClick" ToolTip.Tip="关闭小窗口">
-                    <PathIcon Data="{StaticResource IconClose}" Width="13" Height="13" />
+                    <PathIcon Data="{StaticResource IconClose}" Width="12" Height="12"
+                              Foreground="{DynamicResource TextTertiaryBrush}" />
                 </Button>
             </Grid>
 
-            <!-- ===== 当前电台 + 播放控制 ===== -->
-            <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center"
-                  Margin="0,6,0,0">
-                <Border Grid.Column="0" Width="52" Height="52" CornerRadius="26"
-                        Background="{Binding CurrentStation.Name, Converter={StaticResource StationAvatar}}">
-                    <TextBlock Text="{Binding CurrentStation.Name, Converter={StaticResource StationInitial}}"
-                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                               FontSize="20" FontWeight="Bold" Foreground="White" />
+            <!-- ===== 台标 / 信息 / 控制 ===== -->
+            <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+
+                <Border Grid.Column="0" Width="58" Height="58" CornerRadius="16" Classes="avatar"
+                        Background="{Binding CurrentStation.Name, Converter={StaticResource StationAvatar}}"
+                        BoxShadow="0 4 12 0 #26000000">
+                    <Grid>
+                        <Border Classes="gloss" CornerRadius="16" />
+                        <TextBlock Text="{Binding CurrentStation.Name, Converter={StaticResource StationInitial}}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   FontSize="22" FontWeight="Bold" Foreground="#F2FFFFFF" />
+                    </Grid>
                 </Border>
 
-                <StackPanel Grid.Column="1" Margin="12,0,8,0" VerticalAlignment="Center" Spacing="2">
-                    <TextBlock Text="{Binding CurrentStation.Name}" FontSize="15" FontWeight="SemiBold"
+                <StackPanel Grid.Column="1" Margin="13,0,10,0" VerticalAlignment="Center" Spacing="3">
+                    <TextBlock Text="{Binding CurrentStation.Name}" FontSize="14.5" FontWeight="SemiBold"
                                TextTrimming="CharacterEllipsis"
                                Foreground="{DynamicResource TextPrimaryBrush}" />
-                    <TextBlock Text="{Binding StatusText}" FontSize="11.5"
-                               TextTrimming="CharacterEllipsis"
-                               Foreground="{DynamicResource TextSecondaryBrush}" />
-                    <TextBlock Text="{Binding NowPlaying}" FontSize="11.5"
+
+                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <Ellipse Classes="onAir" Width="6" Height="6" IsVisible="{Binding IsPlaying}" />
+                        <TextBlock Text="{Binding StatusText}" FontSize="11"
+                                   TextTrimming="CharacterEllipsis"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding NowPlaying}" FontSize="11"
                                TextTrimming="CharacterEllipsis"
                                IsVisible="{Binding NowPlaying, Converter={StaticResource NotEmpty}}"
-                               Foreground="{DynamicResource TextPrimaryBrush}" Opacity="0.75" />
+                               Foreground="{DynamicResource AccentBrush}" Opacity="0.85" />
                 </StackPanel>
 
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2"
-                            VerticalAlignment="Center">
-                    <Button Classes="transport" Command="{Binding PlayPreviousCommand}"
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                    <Button Classes="icon" Width="32" Height="32" Padding="0"
+                            Command="{Binding PlayPreviousCommand}"
                             ToolTip.Tip="上一曲" IsEnabled="{Binding CanSwitchStation}">
-                        <PathIcon Data="{StaticResource IconPrevious}" Width="16" Height="16" />
+                        <PathIcon Data="{StaticResource IconPrevious}" Width="15" Height="15"
+                                  Foreground="{DynamicResource TextSecondaryBrush}" />
                     </Button>
 
-                    <Button Width="42" Height="42" CornerRadius="21" Padding="0" BorderThickness="0"
-                            Background="{DynamicResource SystemAccentColor}"
-                            Command="{Binding TogglePlayPauseCommand}" ToolTip.Tip="播放 / 暂停">
-                        <PathIcon Width="19" Height="19" Foreground="White"
-                                  Data="{Binding IsPlaying, Converter={StaticResource PlayPauseIcon}}" />
-                    </Button>
+                    <Border Width="42" Height="42" CornerRadius="21" BoxShadow="0 5 12 0 #40F2552E">
+                        <Button Classes="round" Width="42" Height="42"
+                                Command="{Binding TogglePlayPauseCommand}" ToolTip.Tip="播放 / 暂停">
+                            <PathIcon Width="18" Height="18" Foreground="White"
+                                      Data="{Binding IsPlaying, Converter={StaticResource PlayPauseIcon}}" />
+                        </Button>
+                    </Border>
 
-                    <Button Classes="transport" Command="{Binding PlayNextCommand}"
+                    <Button Classes="icon" Width="32" Height="32" Padding="0"
+                            Command="{Binding PlayNextCommand}"
                             ToolTip.Tip="下一曲" IsEnabled="{Binding CanSwitchStation}">
-                        <PathIcon Data="{StaticResource IconNext}" Width="16" Height="16" />
+                        <PathIcon Data="{StaticResource IconNext}" Width="15" Height="15"
+                                  Foreground="{DynamicResource TextSecondaryBrush}" />
                     </Button>
                 </StackPanel>
             </Grid>
 
             <!-- ===== 音量 ===== -->
-            <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,0">
-                <Button Grid.Column="0" Classes="chrome" Padding="5"
+            <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="0,10,0,0">
+                <Button Grid.Column="0" Classes="icon" Width="26" Height="26" Padding="0"
                         Command="{Binding ToggleMuteCommand}" ToolTip.Tip="静音">
-                    <PathIcon Width="15" Height="15"
+                    <PathIcon Width="14" Height="14" Foreground="{DynamicResource TextSecondaryBrush}"
                               Data="{Binding IsMuted, Converter={StaticResource VolumeIcon}}" />
                 </Button>
-                <Slider Grid.Column="1" Margin="4,0,8,0" Minimum="0" Maximum="100"
+                <Slider Grid.Column="1" Margin="6,0,8,0" Minimum="0" Maximum="100"
                         Value="{Binding Volume, Mode=TwoWay}" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="2" Width="26" FontSize="11" VerticalAlignment="Center"
+                <TextBlock Grid.Column="2" Width="24" FontSize="11" VerticalAlignment="Center"
                            Text="{Binding Volume}"
-                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                           Foreground="{DynamicResource TextTertiaryBrush}" />
             </Grid>
         </Grid>
     </Border>

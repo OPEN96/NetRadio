@@ -71,17 +71,31 @@ public sealed partial class RadioStation : ObservableObject
     }
 
     /// <summary>标签列表，最多展示 3 个。</summary>
-    public string DisplayTags
+    public string DisplayTags => string.Join(" / ", TagList);
+
+    private string? _tagCacheSource;
+    private IReadOnlyList<string> _tagCache = Array.Empty<string>();
+
+    /// <summary>拆成独立标签，供界面渲染成一个个小胶囊。结果按 Tags 缓存，避免每次属性通知都重建集合。</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public IReadOnlyList<string> TagList
     {
         get
         {
-            if (string.IsNullOrWhiteSpace(Tags)) return string.Empty;
-            var items = Tags!.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                             .Where(t => t.Length > 0)
-                             .Take(3);
-            return string.Join(" / ", items);
+            if (ReferenceEquals(_tagCacheSource, Tags)) return _tagCache;
+
+            _tagCacheSource = Tags;
+            _tagCache = string.IsNullOrWhiteSpace(Tags)
+                ? Array.Empty<string>()
+                : Tags!.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                       .Where(t => t.Length > 0)
+                       .Take(3)
+                       .ToArray();
+            return _tagCache;
         }
     }
+
+    partial void OnTagsChanged(string? value) => OnPropertyChanged(nameof(TagList));
 
     public RadioStation Clone() => (RadioStation)MemberwiseClone();
 }
